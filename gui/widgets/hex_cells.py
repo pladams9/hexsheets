@@ -8,6 +8,8 @@ class HexCells(tk.Frame):
         self._hex_columns = 20
         self._hex_rows = 20
         self._canvas_ready = False
+        self.current_cell = None
+        self._cell_coords = {}
 
         super().__init__(master, **(self._custom_options(**kwargs)))
 
@@ -38,8 +40,6 @@ class HexCells(tk.Frame):
             xscrollcommand=h_scroll.set,
             yscrollcommand=v_scroll.set
         )
-
-        self.current_cell = None
 
     def config(self, **kwargs):
         super().config(**(self._custom_options(**kwargs)))
@@ -97,14 +97,17 @@ class HexCells(tk.Frame):
                                      self._hex_height)
                 self._canvas.addtag_withtag(''.join(['col', str(x)]), h)
                 self._canvas.addtag_withtag(''.join(['row', str(y)]), h)
+                self._cell_coords[h] = (x, y)
         self._canvas.config(scrollregion=self._canvas.bbox(tk.ALL))
 
     def _cell_click(self, cell):
-        if self.current_cell:
-            self._canvas.itemconfig(self.current_cell, width=1, outline=self.colors['cell-line'])
-        self.current_cell = cell
+        self._canvas.itemconfig(tk.ALL, width=1, outline=self.colors['cell-line'])
         self._canvas.itemconfig(cell, width=2, outline=self.colors['active-cell-line'])
         self._canvas.tag_raise(cell)
+
+        self.current_cell = self._cell_coords[cell]
+
+        self.event_generate('<<HexCells_Selected>>')
 
 
 if __name__ == '__main__':

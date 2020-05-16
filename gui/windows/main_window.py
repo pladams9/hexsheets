@@ -42,5 +42,8 @@ class MainWindow(tk.Frame):
         spreadsheet = gui.widgets.HexCells(mainframe, hex_rows=5, hex_columns=5)
         spreadsheet.grid(column=0, row=1, sticky='nsew')
 
-        status_bar = tk.Label(mainframe, text='Status here...', relief=tk.GROOVE, anchor=tk.W)
-        status_bar.grid(column=0, row=2, sticky=(tk.W, tk.E))
+        self.status_bar = tk.Label(mainframe, relief=tk.GROOVE, anchor=tk.W)
+        self.status_bar.grid(column=0, row=2, sticky=(tk.W, tk.E))
+
+    def update_status_bar(self, text):
+        self.status_bar.config(text=text)

@@ -8,5 +8,11 @@ class Controller:
         self.tk_root = tk.Tk()
         self.view = view.View(self.tk_root)
 
+        # Event Bindings
+        def cell_select(event):
+            self.view.set_value('status_bar', str(event.widget.current_cell))
+
+        self.tk_root.bind('<<HexCells_Selected>>', cell_select)
+
     def start(self):
         self.tk_root.mainloop()
