@@ -11,6 +11,7 @@ class Controller:
         # Event Bindings
         def cell_select(event):
             self.view.set_value('status_bar', str(event.widget.current_cell))
+            self.view.set_value('cell_values', {event.widget.current_cell: 'new_value'})
 
         self.tk_root.bind('<<HexCells_Selected>>', cell_select)
 

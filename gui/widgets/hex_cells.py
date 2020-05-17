@@ -1,4 +1,6 @@
 import tkinter as tk
+from tkinter import font
+import ast
 
 
 class HexCells(tk.Frame):
@@ -8,8 +10,9 @@ class HexCells(tk.Frame):
         self._hex_columns = 20
         self._hex_rows = 20
         self._canvas_ready = False
-        self.current_cell = None
         self._cell_coords = {}
+        self.current_cell = None
+        self._internal_cell_selection = None
 
         super().__init__(master, **(self._custom_options(**kwargs)))
 
@@ -28,6 +31,7 @@ class HexCells(tk.Frame):
         self._canvas = tk.Canvas(self)
         self._canvas.config(bg=self.colors['bg'])
         self._canvas.grid(column=0, row=0, sticky='nsew')
+        self._canvas.bind('<Button-1>', self._cell_click)
         self._canvas_ready = True
         self._create_hex_grid()
 
@@ -82,32 +86,66 @@ class HexCells(tk.Frame):
         ]
         hex_shape = self._canvas.create_polygon(hex_coords,
                                                 fill=self.colors['cell-bg'],
-                                                outline=self.colors['cell-line']
+                                                outline=self.colors['cell-line'],
+                                                tag='hex'
                                                 )
-        self._canvas.tag_bind(hex_shape, '<ButtonPress-1>', lambda e: self._cell_click(hex_shape))
         return hex_shape
+
+    def _create_cell_text(self, x, y, width, height):
+        cell_label = tk.Label(self._canvas, font=font.Font(size=-int(height/2)), anchor=tk.W, text='TEST')
+        cell_label.bindtags((str(self._canvas), 'Label', '.', 'all'))
+
+        cell_text = self._canvas.create_window(
+            x, y + (height/4),
+            anchor=tk.NW, width=width, height=int(height/2),
+            window=cell_label, tag='text')
+
+        return cell_text
 
     def _create_hex_grid(self):
         self._canvas.delete(tk.ALL)
-        for y in range(self._hex_rows):
-            for x in range(self._hex_columns):
-                h = self._create_hex(x * (self._hex_width + (self._hex_height * 0.25)),
-                                     (y * self._hex_height) + [0, self._hex_height / 2][x % 2],
-                                     self._hex_width,
-                                     self._hex_height)
-                self._canvas.addtag_withtag(''.join(['col', str(x)]), h)
-                self._canvas.addtag_withtag(''.join(['row', str(y)]), h)
-                self._cell_coords[h] = (x, y)
+        for cell_y in range(self._hex_rows):
+            for cell_x in range(self._hex_columns):
+                canvas_x = cell_x * (self._hex_width + (self._hex_height * 0.25))
+                canvas_y = (cell_y * self._hex_height) + [0, self._hex_height / 2][cell_x % 2]
+                h = self._create_hex(canvas_x, canvas_y,
+                                     self._hex_width, self._hex_height)
+                self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), h)
+                self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), h)
+                self._cell_coords[h] = (cell_x, cell_y)
+
+                t = self._create_cell_text(canvas_x, canvas_y, self._hex_width, self._hex_height)
+                self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), t)
+                self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), t)
         self._canvas.config(scrollregion=self._canvas.bbox(tk.ALL))
 
-    def _cell_click(self, cell):
-        self._canvas.itemconfig(tk.ALL, width=1, outline=self.colors['cell-line'])
-        self._canvas.itemconfig(cell, width=2, outline=self.colors['active-cell-line'])
-        self._canvas.tag_raise(cell)
+    def _cell_click(self, e):
+        canvas_x = self._canvas.canvasx(e.widget.winfo_x() + e.x)
+        canvas_y = self._canvas.canvasy(e.widget.winfo_y() + e.y)
 
-        self.current_cell = self._cell_coords[cell]
+        self._canvas.dtag('clicked', 'clicked')
+        self._canvas.addtag_overlapping('clicked', canvas_x, canvas_y, canvas_x, canvas_y)
+        items = self._canvas.find_withtag('clicked&&hex')
 
-        self.event_generate('<<HexCells_Selected>>')
+        if items:
+            cell = items[0]
+            self._canvas.itemconfig('hex', width=1, outline=self.colors['cell-line'])
+            self._canvas.itemconfig(cell, width=2, outline=self.colors['active-cell-line'])
+            self._canvas.tag_raise(cell)
+
+            self.current_cell = self._cell_coords[cell]
+
+            self.event_generate('<<HexCells_Selected>>')
+
+    def set_cell_values(self, values):
+        values_dict = ast.literal_eval(values)
+        for coord in values_dict:
+            items = self._canvas.find_withtag('text&&col{0}&&row{1}'.format(coord[0], coord[1]))
+            if items:
+                cell_label = self.nametowidget(
+                    self._canvas.itemcget(items[0], 'window')
+                )
+                cell_label.config(text=values_dict[coord])
 
 
 if __name__ == '__main__':
