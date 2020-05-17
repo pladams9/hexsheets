@@ -2,27 +2,26 @@ import tkinter as tk
 import gui.widgets
 
 
-class MainWindow:
-    def __init__(self, parent_view, tk_root):
-        self.parent_view = parent_view
-        self.tk_root = tk_root
+class MainWindow(tk.Frame):
+    def __init__(self, master, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
 
-        tk_root.title('Hexagonal Spreadsheet')
-        tk_root.geometry('800x600')
+        master.title('Hexagonal Spreadsheet')
+        master.geometry('800x600')
 
-        menu_bar = tk.Menu(tk_root)
+        menu_bar = tk.Menu(master)
         file_menu = tk.Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="New...")
         file_menu.add_command(label="Open...")
         file_menu.add_command(label="Save...")
         file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=tk_root.quit)
+        file_menu.add_command(label="Exit", command=master.quit)
         menu_bar.add_cascade(label="File", menu=file_menu)
-        tk_root.configure(menu=menu_bar)
+        master.configure(menu=menu_bar)
 
-        tk_root.rowconfigure(0, weight=1)
-        tk_root.columnconfigure(0, weight=1)
-        mainframe = tk.Frame(tk_root)
+        master.rowconfigure(0, weight=1)
+        master.columnconfigure(0, weight=1)
+        mainframe = tk.Frame(master)
         mainframe.grid(sticky='nsew')
         mainframe.rowconfigure(1, weight=1)
         mainframe.columnconfigure(0, weight=1)
@@ -40,13 +39,11 @@ class MainWindow:
         tk.Label(formula_bar, text='Formula:').pack(side=tk.LEFT)
         tk.Entry(formula_bar).pack(fill=tk.X)
 
-        self.spreadsheet = gui.widgets.HexCells(mainframe, hex_rows=5, hex_columns=5)
-        self.spreadsheet.grid(column=0, row=1, sticky='nsew')
-        self.parent_view.add_observer('cell_values', self.spreadsheet.set_cell_values)
+        spreadsheet = gui.widgets.HexCells(mainframe, hex_rows=5, hex_columns=5)
+        spreadsheet.grid(column=0, row=1, sticky='nsew')
 
         self.status_bar = tk.Label(mainframe, relief=tk.GROOVE, anchor=tk.W)
         self.status_bar.grid(column=0, row=2, sticky=(tk.W, tk.E))
-        self.parent_view.add_observer('status_bar', self.update_status_bar)
 
     def update_status_bar(self, text):
         self.status_bar.config(text=text)
