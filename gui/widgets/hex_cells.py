@@ -92,7 +92,7 @@ class HexCells(tk.Frame):
         return hex_shape
 
     def _create_cell_text(self, x, y, width, height):
-        cell_label = tk.Label(self._canvas, font=font.Font(size=-int(height/2)), anchor=tk.W, text='TEST')
+        cell_label = tk.Label(self._canvas, font=font.Font(size=-int(height/2)), anchor=tk.W)
         cell_label.bindtags((str(self._canvas), 'Label', '.', 'all'))
 
         cell_text = self._canvas.create_window(
@@ -135,7 +135,7 @@ class HexCells(tk.Frame):
 
             self.current_cell = self._cell_coords[cell]
 
-            self.event_generate('<<HexCells_Selected>>')
+            self.event_generate('<<HexCells_Selected>>', when='tail')
 
     def set_cell_values(self, values):
         values_dict = ast.literal_eval(values)

@@ -38,9 +38,16 @@ class MainWindow:
         formula_bar = tk.Frame(top_bar)
         formula_bar.grid(column=0, row=1, sticky='we')
         tk.Label(formula_bar, text='Formula:').pack(side=tk.LEFT)
-        tk.Entry(formula_bar).pack(fill=tk.X)
 
-        self.spreadsheet = gui.widgets.HexCells(mainframe, hex_rows=5, hex_columns=5)
+        self.formula_box = tk.Entry(
+            formula_bar,
+            validate='key',
+            vcmd=self._enter_formula
+        )
+        self.formula_box.pack(fill=tk.X)
+        self.parent_view.add_observer('formula_box', self.update_formula_box)
+
+        self.spreadsheet = gui.widgets.HexCells(mainframe, hex_rows=20, hex_columns=20)
         self.spreadsheet.grid(column=0, row=1, sticky='nsew')
         self.parent_view.add_observer('cell_values', self.spreadsheet.set_cell_values)
 
@@ -50,3 +57,11 @@ class MainWindow:
 
     def update_status_bar(self, text):
         self.status_bar.config(text=text)
+
+    def _enter_formula(self):
+        self.formula_box.event_generate('<<FormulaChanged>>', when='tail')
+        return True
+
+    def update_formula_box(self, text):
+        self.formula_box.delete(0, tk.END)
+        self.formula_box.insert(0, text)
