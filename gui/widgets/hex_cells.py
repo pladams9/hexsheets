@@ -45,6 +45,9 @@ class HexCells(tk.Frame):
             yscrollcommand=v_scroll.set
         )
 
+        self.hidden_entry = tk.Entry(self)
+        self.hidden_entry.place(x=-100, y=-100)
+
     def config(self, **kwargs):
         super().config(**(self._custom_options(**kwargs)))
 
@@ -104,6 +107,8 @@ class HexCells(tk.Frame):
 
     def _create_hex_grid(self):
         self._canvas.delete(tk.ALL)
+        self._cell_coords = {}
+        self._cell_entry_boxes = {}
         for cell_y in range(self._hex_rows):
             for cell_x in range(self._hex_columns):
                 canvas_x = cell_x * (self._hex_width + (self._hex_height * 0.25))
@@ -125,17 +130,19 @@ class HexCells(tk.Frame):
 
         self._canvas.dtag('clicked', 'clicked')
         self._canvas.addtag_overlapping('clicked', canvas_x, canvas_y, canvas_x, canvas_y)
-        items = self._canvas.find_withtag('clicked&&hex')
 
-        if items:
-            cell = items[0]
-            self._canvas.itemconfig('hex', width=1, outline=self.colors['cell-line'])
+        self._canvas.itemconfig('hex', width=1, outline=self.colors['cell-line'])
+        matching_cells = self._canvas.find_withtag('clicked && hex')
+        if matching_cells:
+            cell = matching_cells[0]
             self._canvas.itemconfig(cell, width=2, outline=self.colors['active-cell-line'])
             self._canvas.tag_raise(cell)
 
             self.current_cell = self._cell_coords[cell]
 
             self.event_generate('<<HexCells_Selected>>', when='tail')
+
+        self.hidden_entry.focus_set()
 
     def set_cell_values(self, values):
         values_dict = ast.literal_eval(values)
