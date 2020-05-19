@@ -1,3 +1,6 @@
+import model.formula_parser as fp
+
+
 class Model:
     def __init__(self):
         self._cell_formulas = {}
