@@ -10,7 +10,7 @@ class Model:
         if self._selected_cell:
             self._cell_formulas[self._selected_cell] = value
 
-    def get__selected_cell_formula(self):
+    def get_selected_cell_formula(self):
         if self._selected_cell and (self._selected_cell in self._cell_formulas):
             return self._cell_formulas[self._selected_cell]
         else:

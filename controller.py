@@ -13,7 +13,7 @@ class Controller:
         def cell_select(event):
             xy = event.widget.current_cell
             self.model.select_cell(xy[0], xy[1])
-            self.view.set_value('formula_box', self.model.get__selected_cell_formula())
+            self.view.set_value('formula_box', self.model.get_selected_cell_formula())
 
             self.view.set_value('status_bar', str(event.widget.current_cell))
 
