@@ -20,17 +20,18 @@ class TestFormulaParser(unittest.TestCase):
     def test_update_nodes(self):
         self.parser.update_nodes(self.cells_a)
         self.assertEqual(self.parser._nodes.keys(), self.cells_a.keys())
-        # TODO: Check value of nodes
+        for cell in self.cells_a:
+            self.assertEqual(self.cells_a[cell], self.parser._nodes[cell])
 
         # TODO: Add in cells_b and check resulting nodes
 
-    def test_delete_nodes(self):
+    def xtest_delete_nodes(self):
         self.parser.update_nodes(self.cells_a)
         self.parser.delete_nodes(self.delete_cells)
         # TODO: Check existence of cells
         # TODO: Check values of nodes
 
-    def test_get_node_value(self):
+    def xtest_get_node_value(self):
         self.parser.update_nodes(self.cells_a)
         for cell in self.cells_a:
             # TODO: check value
