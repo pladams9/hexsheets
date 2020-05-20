@@ -3,4 +3,5 @@ class FormulaParser:
         self._nodes = {}
 
     def update_nodes(self, nodes):
-        self._nodes = nodes
+        for node in nodes:
+            self._nodes[node] = nodes[node]
