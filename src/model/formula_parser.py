@@ -24,8 +24,9 @@ class FormulaParser:
         else:
             return 2
 
-    def _cast_value(self, value):
-        if value.replace('.', '').replace('-', '').isdigit():
+    @staticmethod
+    def _cast_value(value):
+        if (value.replace('.', '').replace('-', '').isdigit()) and value.count('.') <= 1:
             if value.count('.') == 1:
                 return float(value)
             else:
