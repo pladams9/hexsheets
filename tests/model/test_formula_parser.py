@@ -78,5 +78,18 @@ class TestFormulaParser(unittest.TestCase):
                 self.assertEqual(self.parser._cast_value(value), values[value])
                 self.assertIsInstance(self.parser._cast_value(value), type(values[value]))
 
+    def test_parse_formula(self):
+        self.parser.update_nodes(self.cells_a)
+        formulas = {
+            '1+1': 2,
+            '1 + 1': 2,
+            '[1,3]': 24,
+            '[1, 3]': 24
+        }
+        for formula in formulas:
+            with self.subTest(formula=formula):
+                self.assertEqual(self.parser._parse_formula(formula), formulas[formula])
+
+
 if __name__ == '__main__':
     unittest.main()
