@@ -18,50 +18,89 @@ class FormulaParser:
             value = self._cast_value(formula)
         return value
 
-    def _parse_formula(self, formula):
-        brackets = []
-        bracket_pairs = []
-        for index, char in enumerate(formula):
-            if char == '[':
-                brackets.append(index)
-            if char == ']':
-                bracket_pairs.insert(0, (brackets.pop(), index))
-        for bracket_pair in bracket_pairs:
-            coordinates = tuple([int(x) for x in formula[bracket_pair[0] + 1:bracket_pair[1]].split(',')])
-            cell_value = self.get_node_value(coordinates)
-            formula = formula[0:bracket_pair[0]] + str(cell_value) + formula[bracket_pair[1] + 1:]
+    @staticmethod
+    def _tokenize(string):
+        operators = ['+', '-', '*', '/']
+        brackets = {
+            '"': '"',
+            '(': ')',
+            '[': ']'
+        }
 
-        operators = ['+', '-']
-        formula = formula.replace(' ', '')
+        tokens = []
+        sub_start = 0
+        current_bracket = None
+        for index, char in enumerate(string):
+            if current_bracket:
+                if char == brackets[current_bracket]:
+                    tokens.append(('BRACKET', current_bracket, string[sub_start:index].strip()))
+                    current_bracket = None
+                    sub_start = index + 1
+                continue
 
-        sum = 0
-        current_operand = ''
-        last_operator = ''
-        while len(formula) > 0:
-            char = formula[0]
-            formula = formula[1:]
-
-            if char in operators:
-                if last_operator == '':
-                    sum = self._cast_value(current_operand)
-                elif last_operator == '+':
-                    sum += self._cast_value(current_operand)
-                elif last_operator == '-':
-                    sum -= self._cast_value(current_operand)
-
-                current_operand = ''
-                last_operator = char
-            else:
-                current_operand = current_operand + char
+            if char in brackets:
+                current_bracket = char
+                value = string[sub_start:index].strip()
+                if value != '':
+                    tokens.append(('VALUE', value))
+                sub_start = index + 1
+            elif char in operators:
+                value = string[sub_start:index].strip()
+                if value != '':
+                    tokens.append(('VALUE', value))
+                tokens.append(('OPERATOR', char))
+                sub_start = index + 1
         else:
-            if last_operator == '':
-                sum = self._cast_value(current_operand)
-            elif last_operator == '+':
-                sum += self._cast_value(current_operand)
-            elif last_operator == '-':
-                sum -= self._cast_value(current_operand)
+            value = string[sub_start:].strip()
+            if value != '':
+                tokens.append(('VALUE', value))
 
-        return sum
+        return tokens
+
+    def _parse_formula(self, formula):
+        tokens = self._tokenize(formula)
+        values_and_operators = []
+        for token in tokens:
+            if token[0] == 'VALUE':
+                values_and_operators.append(('VALUE', self._cast_value(token[1])))
+            elif token[0] == 'OPERATOR':
+                values_and_operators.append(token)
+            elif token[0] == 'BRACKET':
+                if token[1] == '"':
+                    values_and_operators.append(('VALUE', token[2]))
+                elif token[1] == '(':
+                    values_and_operators.append(('VALUE', self._parse_formula(token[2])))
+                elif token[1] == '[':
+                    address = self._parse_address(token[2])
+                    values_and_operators.append(('VALUE', self._parse_formula(self._nodes[address])))
+
+        if len(values_and_operators) < 1 or values_and_operators[0][0] != 'VALUE':
+            return '#ERROR'
+        else:
+            return_value = values_and_operators.pop(0)[1]
+            while len(values_and_operators) > 0:
+                operator = values_and_operators.pop(0)[1]
+                if operator == '+':
+                    return_value += values_and_operators.pop(0)[1]
+                elif operator == '-':
+                    return_value -= values_and_operators.pop(0)[1]
+                elif operator == '*':
+                    return_value *= values_and_operators.pop(0)[1]
+                elif operator == '/':
+                    return_value /= values_and_operators.pop(0)[1]
+        return return_value
+
+    def _parse_address(self, address):
+        if address.count(',') != 1:
+            return -1, -1
+
+        coordinates = address.split(',')
+
+        for i in range(2):
+            coordinates[i] = self._parse_formula(coordinates[i])
+            if not isinstance(coordinates[i], int):
+                return -1, -1
+        return tuple(coordinates)
 
     @staticmethod
     def _cast_value(value):

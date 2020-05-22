@@ -78,6 +78,25 @@ class TestFormulaParser(unittest.TestCase):
                 self.assertEqual(self.parser._cast_value(value), values[value])
                 self.assertIsInstance(self.parser._cast_value(value), type(values[value]))
 
+    def test_tokenize(self):
+        strings = {
+            '': [],
+            'abc': [('VALUE', 'abc')],
+            '1 + 2': [('VALUE', '1'), ('OPERATOR', '+'), ('VALUE', '2')],
+            '1+2': [('VALUE', '1'), ('OPERATOR', '+'), ('VALUE', '2')],
+            '1 + 2 + 3': [('VALUE', '1'), ('OPERATOR', '+'), ('VALUE', '2'), ('OPERATOR', '+'), ('VALUE', '3')],
+            '2.5 - 1': [('VALUE', '2.5'), ('OPERATOR', '-'), ('VALUE', '1')],
+            '2 + -1': [('VALUE', '2'), ('OPERATOR', '+'), ('OPERATOR', '-'), ('VALUE', '1')],
+            '"1 + 2"': [('BRACKET', '"', '1 + 2')],
+            '(1 * 2)': [('BRACKET', '(', '1 * 2')],
+            '[1, 2]': [('BRACKET', '[', '1, 2')],
+            '1* 2': [('VALUE', '1'), ('OPERATOR', '*'), ('VALUE', '2')],
+            '1 /2': [('VALUE', '1'), ('OPERATOR', '/'), ('VALUE', '2')]
+        }
+        for string in strings:
+            with self.subTest(string=string):
+                self.assertEqual(self.parser._tokenize(string), strings[string])
+
     def test_parse_formula(self):
         self.parser.update_nodes(self.cells_a)
         formulas = {
@@ -89,6 +108,22 @@ class TestFormulaParser(unittest.TestCase):
         for formula in formulas:
             with self.subTest(formula=formula):
                 self.assertEqual(self.parser._parse_formula(formula), formulas[formula])
+
+    def test_parse_address(self):
+        addresses = {
+            '1,1': (1, 1),
+            '1, 1': (1, 1),
+            '-1, -1': (-1, -1),
+            '1, -5': (-1, -1),
+            '1.5, 1': (-1, -1),
+            '1 + 1, 1': (2, 1),
+            '1': (-1, -1),
+            '1, 1, 1': (-1, -1),
+            '1, ': (-1, -1)
+        }
+        for address in addresses:
+            with self.subTest(address=address):
+                self.assertEqual(self.parser._parse_address(address), addresses[address])
 
 
 if __name__ == '__main__':
