@@ -6,9 +6,8 @@ class FormulaParser:
         for node in nodes:
             self._nodes[node] = str(nodes[node])
 
-    def delete_nodes(self, nodes):
-        for node in nodes:
-            self._nodes.pop(node)
+    def clear_nodes(self):
+        self._nodes = {}
 
     def get_node_value(self, node):
         formula = self._nodes[node]
@@ -76,9 +75,11 @@ class FormulaParser:
                     values_and_operators.append(('VALUE', self._parse_formula(token[2])))
                 elif token[1] == '[':
                     address = self._parse_address(token[2])
-                    values_and_operators.append(('VALUE', self._parse_formula(self._nodes[address])))
+                    values_and_operators.append(('VALUE', self._parse_formula(self._nodes.get(address, ''))))
 
-        if len(values_and_operators) < 1 or values_and_operators[0][0] != 'VALUE':
+        if len(values_and_operators) < 1:
+            return ''
+        if values_and_operators[0][0] != 'VALUE':
             return '#ERROR'
         else:
             return_value = values_and_operators.pop(0)[1]

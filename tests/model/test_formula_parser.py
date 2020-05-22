@@ -8,7 +8,8 @@ class TestFormulaParser(unittest.TestCase):
             (1, 1): 'Test',
             (1, 3): 24,
             (2, 4): '=1+1',
-            (3, 1): '=[1, 3] - 2'
+            (3, 1): '=[1, 3] - 2',
+            (2, 2): '=[10, 10]'
         }
         self.cells_b = {
             (1, 1): 'TEST_2',
@@ -19,21 +20,15 @@ class TestFormulaParser(unittest.TestCase):
             (1, 3): 24,
             (2, 4): '=1+1',
             (3, 1): '=[1, 3] - 2',
-            (5, 6): -5
-        }
-        self.delete_cells = [
-            (1, 1),
-            (1, 3)
-        ]
-        self.cells_a_minus_delete = {
-            (2, 4): '=1+1',
-            (3, 1): '=[1, 3] - 2'
+            (5, 6): -5,
+            (2, 2): '=[10, 10]'
         }
         self.cells_a_values = {
             (1, 1): 'Test',
             (1, 3): 24,
             (2, 4): 2,
-            (3, 1): 22
+            (3, 1): 22,
+            (2, 2): ''
         }
         self.parser = fp.FormulaParser()
 
@@ -48,12 +43,10 @@ class TestFormulaParser(unittest.TestCase):
         for cell in self.cells_a_plus_b:
             self.assertEqual(self.parser._nodes[cell], str(self.cells_a_plus_b[cell]))
 
-    def test_delete_nodes(self):
+    def test_clear_nodes(self):
         self.parser.update_nodes(self.cells_a)
-        self.parser.delete_nodes(self.delete_cells)
-        self.assertEqual(self.parser._nodes.keys(), self.cells_a_minus_delete.keys())
-        for cell in self.cells_a_minus_delete:
-            self.assertEqual(self.parser._nodes[cell], str(self.cells_a_minus_delete[cell]))
+        self.parser.clear_nodes()
+        self.assertEqual(self.parser._nodes, {})
 
     def test_get_node_value(self):
         self.parser.update_nodes(self.cells_a)
