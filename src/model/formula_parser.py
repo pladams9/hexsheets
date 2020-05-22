@@ -82,17 +82,25 @@ class FormulaParser:
         if values_and_operators[0][0] != 'VALUE':
             return '#ERROR'
         else:
-            return_value = values_and_operators.pop(0)[1]
-            while len(values_and_operators) > 0:
-                operator = values_and_operators.pop(0)[1]
-                if operator == '+':
-                    return_value += values_and_operators.pop(0)[1]
-                elif operator == '-':
-                    return_value -= values_and_operators.pop(0)[1]
-                elif operator == '*':
-                    return_value *= values_and_operators.pop(0)[1]
-                elif operator == '/':
-                    return_value /= values_and_operators.pop(0)[1]
+            value_types = [type(y[1]) for y in values_and_operators if y[0] == 'VALUE']
+            if str in value_types:
+                for i in range(len(values_and_operators)):
+                    if values_and_operators[i][0] == 'VALUE':
+                        values_and_operators[i] = ('VALUE', str(values_and_operators[i][1]))
+            try:
+                return_value = values_and_operators.pop(0)[1]
+                while len(values_and_operators) > 0:
+                    operator = values_and_operators.pop(0)[1]
+                    if operator == '+':
+                        return_value += values_and_operators.pop(0)[1]
+                    elif operator == '-':
+                        return_value -= values_and_operators.pop(0)[1]
+                    elif operator == '*':
+                        return_value *= values_and_operators.pop(0)[1]
+                    elif operator == '/':
+                        return_value /= values_and_operators.pop(0)[1]
+            except TypeError:
+                return_value = '#ERROR'
         return return_value
 
     def _parse_address(self, address):

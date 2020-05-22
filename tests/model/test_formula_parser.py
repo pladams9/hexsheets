@@ -96,7 +96,14 @@ class TestFormulaParser(unittest.TestCase):
             '1+1': 2,
             '1 + 1': 2,
             '[1,3]': 24,
-            '[1, 3]': 24
+            '[1, 3]': 24,
+            '+ 10': '#ERROR',
+            '"Cool" + "Neat"': 'CoolNeat',
+            '1 + "Test"': '1Test',
+            '"Cool" + 2': 'Cool2',
+            '1 / "Test"': '#ERROR',
+            'Text + 1': 'Text1',
+            '"T+xt" + 1': 'T+xt1'
         }
         for formula in formulas:
             with self.subTest(formula=formula):
