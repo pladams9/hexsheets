@@ -75,7 +75,7 @@ class FormulaParser:
                     values_and_operators.append(('VALUE', self._parse_formula(token[2])))
                 elif token[1] == '[':
                     address = self._parse_address(token[2])
-                    values_and_operators.append(('VALUE', self._parse_formula(self._nodes.get(address, ''))))
+                    values_and_operators.append(('VALUE', self.get_node_value(address)))
 
         if len(values_and_operators) < 1:
             return ''
