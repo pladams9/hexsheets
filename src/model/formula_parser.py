@@ -12,6 +12,10 @@ class FormulaParser:
 
     def get_node_value(self, node):
         formula = self._nodes[node]
+
+        if len(formula) == 0:
+            return ''
+
         if formula[0] == '=':
             value = self._parse_formula(formula[1:])
         else:
