@@ -9,7 +9,9 @@ class TestFormulaParser(unittest.TestCase):
             (1, 3): 24,
             (2, 4): '=1+1',
             (3, 1): '=[1, 3] - 2',
-            (2, 2): '=[10, 10]'
+            (2, 2): '=[10, 10]',
+            (4, 4): '=[5,5]',
+            (5, 5): '=[4,4]'
         }
         self.cells_b = {
             (1, 1): 'TEST_2',
@@ -21,14 +23,18 @@ class TestFormulaParser(unittest.TestCase):
             (2, 4): '=1+1',
             (3, 1): '=[1, 3] - 2',
             (5, 6): -5,
-            (2, 2): '=[10, 10]'
+            (2, 2): '=[10, 10]',
+            (4, 4): '=[5,5]',
+            (5, 5): '=[4,4]'
         }
         self.cells_a_values = {
             (1, 1): 'Test',
             (1, 3): 24,
             (2, 4): 2,
             (3, 1): 22,
-            (2, 2): ''
+            (2, 2): '',
+            (4, 4): '#CIRCULAR',
+            (5, 5): '#CIRCULAR'
         }
         self.parser = fp.FormulaParser()
 

@@ -1,6 +1,7 @@
 class FormulaParser:
     def __init__(self):
         self._nodes = {}
+        self._start_node = None
 
     def update_nodes(self, nodes):
         for node in nodes:
@@ -10,7 +11,13 @@ class FormulaParser:
         self._nodes = {}
 
     def get_node_value(self, node):
-        formula = self._nodes[node]
+        if node == self._start_node:
+            self._start_node = None
+            return '#CIRCULAR'
+        else:
+            if self._start_node is None:
+                self._start_node = node
+        formula = self._nodes.get(node, '')
 
         if len(formula) == 0:
             return ''
@@ -19,6 +26,9 @@ class FormulaParser:
             value = self._parse_formula(formula[1:])
         else:
             value = self._cast_value(formula)
+
+        if node == self._start_node:
+            self._start_node = None
         return value
 
     @staticmethod
