@@ -17,6 +17,7 @@ class FormulaParser:
         else:
             if self._start_node is None:
                 self._start_node = node
+
         formula = self._nodes.get(node, '')
 
         if len(formula) == 0:
@@ -29,6 +30,7 @@ class FormulaParser:
 
         if node == self._start_node:
             self._start_node = None
+
         return value
 
     @staticmethod
@@ -70,8 +72,7 @@ class FormulaParser:
 
         return tokens
 
-    def _parse_formula(self, formula):
-        tokens = self._tokenize(formula)
+    def _parse_tokens(self, tokens):
         values_and_operators = []
         for token in tokens:
             if token[0] == 'VALUE':
@@ -87,30 +88,40 @@ class FormulaParser:
                     address = self._parse_address(token[2])
                     values_and_operators.append(('VALUE', self.get_node_value(address)))
 
-        if len(values_and_operators) < 1:
+        return values_and_operators
+
+    @staticmethod
+    def _calculate_tokens(tokens):
+        if len(tokens) < 1:
             return ''
-        if values_and_operators[0][0] != 'VALUE':
+        if tokens[0][0] != 'VALUE':
             return '#ERROR'
         else:
-            value_types = [type(y[1]) for y in values_and_operators if y[0] == 'VALUE']
+            value_types = [type(y[1]) for y in tokens if y[0] == 'VALUE']
             if str in value_types:
-                for i in range(len(values_and_operators)):
-                    if values_and_operators[i][0] == 'VALUE':
-                        values_and_operators[i] = ('VALUE', str(values_and_operators[i][1]))
+                for i in range(len(tokens)):
+                    if tokens[i][0] == 'VALUE':
+                        tokens[i] = ('VALUE', str(tokens[i][1]))
             try:
-                return_value = values_and_operators.pop(0)[1]
-                while len(values_and_operators) > 0:
-                    operator = values_and_operators.pop(0)[1]
+                return_value = tokens.pop(0)[1]
+                while len(tokens) > 0:
+                    operator = tokens.pop(0)[1]
                     if operator == '+':
-                        return_value += values_and_operators.pop(0)[1]
+                        return_value += tokens.pop(0)[1]
                     elif operator == '-':
-                        return_value -= values_and_operators.pop(0)[1]
+                        return_value -= tokens.pop(0)[1]
                     elif operator == '*':
-                        return_value *= values_and_operators.pop(0)[1]
+                        return_value *= tokens.pop(0)[1]
                     elif operator == '/':
-                        return_value /= values_and_operators.pop(0)[1]
+                        return_value /= tokens.pop(0)[1]
             except TypeError:
                 return_value = '#ERROR'
+        return return_value
+
+    def _parse_formula(self, formula):
+        tokens = self._tokenize(formula)
+        values_and_operators = self._parse_tokens(tokens)
+        return_value = self._calculate_tokens(values_and_operators)
         return return_value
 
     def _parse_address(self, address):
