@@ -7,7 +7,7 @@ class MainWindow:
         self.parent_view = parent_view
         self.tk_root = tk_root
 
-        tk_root.title('Hexagonal Spreadsheet')
+        tk_root.title('HexSheets')
         tk_root.geometry('800x600')
 
         menu_bar = tk.Menu(tk_root)
@@ -31,9 +31,12 @@ class MainWindow:
         top_bar.grid(column=0, row=0, sticky='nsew')
         top_bar.columnconfigure(0, weight=1)
 
+        # TODO: Add buttons on the tool bar
+        '''
         tool_bar = tk.Frame(top_bar)
         tk.Button(tool_bar, text='Test').pack(side=tk.LEFT)
         tool_bar.grid(column=0, row=0, sticky='we')
+        '''
 
         formula_bar = tk.Frame(top_bar)
         formula_bar.grid(column=0, row=1, sticky='we')
