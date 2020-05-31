@@ -70,10 +70,13 @@ class MainWindow:
                 box.delete(0, tk.END)
                 box.insert(0, new_text)
         self.formula_box.event_generate('<<FormulaChanged>>', when='tail')
+
         return True
 
     def update_formula_box(self, text):
-        self.formula_box.delete(0, tk.END)
-        self.formula_box.insert(0, text)
-        self.spreadsheet.hidden_entry.delete(0, tk.END)
-        self.spreadsheet.hidden_entry.insert(0, text)
+        for box in self._formula_boxes:
+            validation = box.cget('validate')
+            box.config(validate='none')
+            box.delete(0, tk.END)
+            box.insert(0, text)
+            box.config(validate=validation)
