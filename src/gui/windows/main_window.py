@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.filedialog as fd
 import gui.widgets
 
 
@@ -12,9 +13,9 @@ class MainWindow:
 
         menu_bar = tk.Menu(tk_root)
         file_menu = tk.Menu(menu_bar, tearoff=0)
-        file_menu.add_command(label="New...")
-        file_menu.add_command(label="Open...")
-        file_menu.add_command(label="Save...")
+        file_menu.add_command(label="New...", command=self._new_file)
+        file_menu.add_command(label="Open...", command=self._open_file)
+        file_menu.add_command(label="Save...", command=self._save_file)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=tk_root.quit)
         menu_bar.add_cascade(label="File", menu=file_menu)
@@ -83,3 +84,14 @@ class MainWindow:
             box.delete(0, tk.END)
             box.insert(0, text)
             box.config(validate=validation)
+
+    def _new_file(self):
+        pass
+
+    def _open_file(self):
+        open_file_name = fd.askopenfilename(filetypes=(('HexSheets', '*.hxs'),
+                                                       ('All Files', '*.*')))
+        print(open_file_name)
+
+    def _save_file(self):
+        pass
