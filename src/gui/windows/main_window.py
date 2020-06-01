@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.filedialog as fd
 import gui.widgets
+import event
 
 
 class MainWindow:
@@ -47,7 +48,7 @@ class MainWindow:
         self.formula_box.pack(fill=tk.X)
         self.parent_view.add_observer('formula_box', self.update_formula_box)
 
-        self.spreadsheet = gui.widgets.HexCells(mainframe, hex_rows=20, hex_columns=20)
+        self.spreadsheet = gui.widgets.HexCells(mainframe, hex_rows=20, hex_columns=20, select_command=self.select_cell)
         self.spreadsheet.grid(column=0, row=1, sticky='nsew')
         self.parent_view.add_observer('cell_values', self.spreadsheet.set_cell_values)
 
@@ -73,7 +74,7 @@ class MainWindow:
             if box != self.tk_root.nametowidget(widget):
                 box.delete(0, tk.END)
                 box.insert(0, new_text)
-        self.formula_box.event_generate('<<FormulaChanged>>', when='tail')
+        self.parent_view.add_event(event.Event('FormulaChanged', {'formula': new_text}))
 
         return True
 
@@ -85,13 +86,19 @@ class MainWindow:
             box.insert(0, text)
             box.config(validate=validation)
 
+    def select_cell(self, address):
+        self.parent_view.add_event(event.Event('CellSelected', {'address': address}))
+
     def _new_file(self):
-        pass
+        self.parent_view.add_event(event.Event('NewFile'))
 
     def _open_file(self):
         open_file_name = fd.askopenfilename(filetypes=(('HexSheets', '*.hxs'),
                                                        ('All Files', '*.*')))
-        print(open_file_name)
+        self.parent_view.add_event(event.Event('OpenFile', {'filename': open_file_name}))
 
     def _save_file(self):
-        pass
+        save_file_name = fd.asksaveasfilename(defaultextension='hxs',
+                                              filetypes=(('HexSheets', '*.hxs'),
+                                                         ('All Files', '*.*')))
+        self.parent_view.add_event(event.Event('SaveFile', {'filename': save_file_name}))

@@ -13,6 +13,7 @@ class HexCells(tk.Frame):
         self._cell_coords = {}
         self.current_cell = None
         self._internal_cell_selection = None
+        self._select_command = None
 
         super().__init__(master, **(self._custom_options(**kwargs)))
 
@@ -75,6 +76,11 @@ class HexCells(tk.Frame):
 
         if self._canvas_ready and redraw_needed:
             self._create_hex_grid()
+
+        # Click Command
+        if 'select_command' in kwargs:
+            self._select_command = kwargs['select_command']
+            kwargs.pop('select_command')
 
         return kwargs
 
@@ -140,19 +146,19 @@ class HexCells(tk.Frame):
 
             self.current_cell = self._cell_coords[cell]
 
-            self.event_generate('<<HexCells_Selected>>', when='tail')
+            if self._select_command:
+                self._select_command(self.current_cell)
 
         self.hidden_entry.focus_set()
 
     def set_cell_values(self, values):
-        values_dict = ast.literal_eval(values)
-        for coord in values_dict:
+        for coord in values:
             items = self._canvas.find_withtag('text&&col{0}&&row{1}'.format(coord[0], coord[1]))
             if items:
                 cell_label = self.nametowidget(
                     self._canvas.itemcget(items[0], 'window')
                 )
-                cell_label.config(text=values_dict[coord])
+                cell_label.config(text=values[coord])
 
 
 if __name__ == '__main__':
