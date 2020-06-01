@@ -1,4 +1,6 @@
 import model.formula_parser as fp
+import json
+import ast
 
 
 class Model:
@@ -30,3 +32,21 @@ class Model:
             else:
                 values[cell] = parser.get_node_value(cell)
         return values
+
+    def new_file(self):
+        self._cell_formulas = {}
+
+    def open_file(self, filename):
+        with open(filename, 'r') as file:
+            data = json.load(file)
+            self._cell_formulas = {}
+            for cell_coord in data:
+                self._cell_formulas[ast.literal_eval(cell_coord)] = data[cell_coord]
+
+    def save_file(self, filename):
+        data = {}
+        for cell_coord in self._cell_formulas:
+            data[str(cell_coord)] = self._cell_formulas[cell_coord]
+
+        with open(filename, 'w') as file:
+            json.dump(data, file)
