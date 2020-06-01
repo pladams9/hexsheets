@@ -152,6 +152,14 @@ class HexCells(tk.Frame):
         self.hidden_entry.focus_set()
 
     def set_cell_values(self, values):
+        items = self._canvas.find_withtag('text&&has_value')
+        for item in items:
+            cell_label = self.nametowidget(
+                self._canvas.itemcget(item, 'window')
+            )
+            cell_label.config(text='')
+        self._canvas.dtag(items, 'has_value')
+
         for coord in values:
             items = self._canvas.find_withtag('text&&col{0}&&row{1}'.format(coord[0], coord[1]))
             if items:
@@ -159,6 +167,7 @@ class HexCells(tk.Frame):
                     self._canvas.itemcget(items[0], 'window')
                 )
                 cell_label.config(text=values[coord])
+                self._canvas.addtag_withtag('has_value', items[0])
 
 
 if __name__ == '__main__':
