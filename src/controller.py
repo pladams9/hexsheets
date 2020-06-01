@@ -45,10 +45,12 @@ class Controller:
         self.view.set_value('status_bar', str(xy))
 
     def new_file(self, e):
-        print('New')
+        self.model.new_file()
+        self.view.set_value('cell_values', self.model.get_cell_values())
 
     def open_file(self, e):
-        pass
+        self.model.open_file(e.data['filename'])
+        self.view.set_value('cell_values', self.model.get_cell_values())
 
     def save_file(self, e):
-        pass
+        self.model.save_file(e.data['filename'])
