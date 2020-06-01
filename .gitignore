@@ -1,7 +1,7 @@
 /venv
 /.idea
 __pycache__/
-.pyc
+*.pyc
 /build
 /dist
-.spec
+*.spec
