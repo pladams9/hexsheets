@@ -2,6 +2,8 @@ import tkinter as tk
 import tkinter.filedialog as fd
 import gui.widgets
 import event
+import webbrowser
+import os
 
 
 class MainWindow:
@@ -13,6 +15,8 @@ class MainWindow:
         tk_root.geometry('800x600')
 
         menu_bar = tk.Menu(tk_root)
+        tk_root.configure(menu=menu_bar)
+
         file_menu = tk.Menu(menu_bar, tearoff=0)
         file_menu.add_command(label="New...", command=self._new_file)
         file_menu.add_command(label="Open...", command=self._open_file)
@@ -20,7 +24,8 @@ class MainWindow:
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=tk_root.quit)
         menu_bar.add_cascade(label="File", menu=file_menu)
-        tk_root.configure(menu=menu_bar)
+
+        menu_bar.add_command(label='Help', command=self._help)
 
         tk_root.rowconfigure(0, weight=1)
         tk_root.columnconfigure(0, weight=1)
@@ -102,3 +107,6 @@ class MainWindow:
                                               filetypes=(('HexSheets', '*.hxs'),
                                                          ('All Files', '*.*')))
         self.parent_view.add_event(event.Event('SaveFile', {'filename': save_file_name}))
+
+    def _help(self):
+        webbrowser.open_new(os.getcwd() + '/docs/index.html')
