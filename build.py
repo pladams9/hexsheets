@@ -11,4 +11,8 @@ os.chdir('..')
 subprocess.run(['pyinstaller', '--clean', '--noconfirm', 'hex-spreadsheet.spec'])
 
 # Clean up build directories
-#shutil.rmtree()
+try:
+    shutil.rmtree('doc_src/site')
+    shutil.rmtree('build')
+except Exception:
+    print('Error removing build folders.')
