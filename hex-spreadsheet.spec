@@ -2,6 +2,8 @@
 
 block_cipher = None
 
+with open('VERSION', 'r') as file:
+    version_number = file.readline().strip()
 
 a = Analysis(['src/hex-spreadsheet.py'],
              pathex=[''],
@@ -21,7 +23,7 @@ exe = EXE(pyz,
           a.scripts,
           [],
           exclude_binaries=True,
-          name='hex-spreadsheet',
+          name=('hexsheets-'+ version_number),
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
@@ -34,4 +36,4 @@ coll = COLLECT(exe,
                strip=False,
                upx=True,
                upx_exclude=[],
-               name='hex-spreadsheet')
+               name='hexsheets')
