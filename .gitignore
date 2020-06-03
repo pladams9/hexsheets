@@ -4,5 +4,4 @@ __pycache__/
 *.pyc
 /build
 /dist
-*.spec
 /doc_src/site
