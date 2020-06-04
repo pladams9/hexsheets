@@ -11,19 +11,23 @@ class MainWindow:
         self.parent_view = parent_view
         self.tk_root = tk_root
 
-        tk_root.title('HexSheets')
         tk_root.geometry('800x600')
+
+        self.parent_view.add_observer('title', self.update_title)
 
         menu_bar = tk.Menu(tk_root)
         tk_root.configure(menu=menu_bar)
 
-        file_menu = tk.Menu(menu_bar, tearoff=0)
-        file_menu.add_command(label="New...", command=self._new_file)
-        file_menu.add_command(label="Open...", command=self._open_file)
-        file_menu.add_command(label="Save...", command=self._save_file)
-        file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=tk_root.quit)
-        menu_bar.add_cascade(label="File", menu=file_menu)
+        self.file_menu = tk.Menu(menu_bar, tearoff=0)
+        self.file_menu.add_command(label="New", command=self._new_file)
+        self.file_menu.add_command(label="Open...", command=self._open_file)
+        self._save_option_allowed = False
+        self.parent_view.add_observer('save_option', self.update_save_option)
+        self.file_menu.add_command(label="Save", command=self._save_file)
+        self.file_menu.add_command(label="Save As...", command=self._save_file_as)
+        self.file_menu.add_separator()
+        self.file_menu.add_command(label="Exit", command=tk_root.quit)
+        menu_bar.add_cascade(label="File", menu=self.file_menu)
 
         menu_bar.add_command(label='Help', command=self._help)
 
@@ -74,6 +78,9 @@ class MainWindow:
     def update_status_bar(self, text):
         self.status_bar.config(text=text)
 
+    def update_title(self, text):
+        self.tk_root.title('HexSheets - ' + text)
+
     def _enter_formula(self, widget, new_text):
         for box in self._formula_boxes:
             if box != self.tk_root.nametowidget(widget):
@@ -102,11 +109,20 @@ class MainWindow:
                                                        ('All Files', '*.*')))
         self.parent_view.add_event(event.Event('OpenFile', {'filename': open_file_name}))
 
+    def update_save_option(self, option):
+        self._save_option_allowed = option
+
     def _save_file(self):
+        if self._save_option_allowed:
+            self.parent_view.add_event(event.Event('SaveFile'))
+        else:
+            self._save_file_as()
+
+    def _save_file_as(self):
         save_file_name = fd.asksaveasfilename(defaultextension='hxs',
                                               filetypes=(('HexSheets', '*.hxs'),
                                                          ('All Files', '*.*')))
-        self.parent_view.add_event(event.Event('SaveFile', {'filename': save_file_name}))
+        self.parent_view.add_event(event.Event('SaveFileAs', {'filename': save_file_name}))
 
     def _help(self):
         webbrowser.open_new(os.getcwd() + '/docs/index.html')
