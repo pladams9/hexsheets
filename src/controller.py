@@ -14,10 +14,13 @@ class Controller:
             'CellSelected': self.cell_selected,
             'NewFile': self.new_file,
             'OpenFile': self.open_file,
-            'SaveFile': self.save_file
+            'SaveFile': self.save_file,
+            'SaveFileAs': self.save_file_as
         }
 
     def start(self):
+        self.view.set_value('title', self.model.get_file_title())
+
         self.tk_root.after(100, self.handle_events)
         self.tk_root.mainloop()
 
@@ -32,6 +35,7 @@ class Controller:
         self.model.set_selected_cell_formula(e.data['formula'])
         self.model.editing_cell = True
         self.view.set_value('cell_values', self.model.get_cell_values())
+        self.view.set_value('title', self.model.get_file_title())
 
     def cell_selected(self, e):
         xy = e.data['address']
@@ -47,10 +51,20 @@ class Controller:
     def new_file(self, e):
         self.model.new_file()
         self.view.set_value('cell_values', self.model.get_cell_values())
+        self.view.set_value('title', self.model.get_file_title())
+        self.view.set_value('save_option', self.model.save_file_exists())
 
     def open_file(self, e):
         self.model.open_file(e.data['filename'])
         self.view.set_value('cell_values', self.model.get_cell_values())
+        self.view.set_value('title', self.model.get_file_title())
+        self.view.set_value('save_option', self.model.save_file_exists())
+
+    def save_file_as(self, e):
+        self.model.save_file(filename=e.data['filename'])
+        self.view.set_value('title', self.model.get_file_title())
+        self.view.set_value('save_option', self.model.save_file_exists())
 
     def save_file(self, e):
-        self.model.save_file(e.data['filename'])
+        self.model.save_file(overwrite=True)
+        self.view.set_value('title', self.model.get_file_title())

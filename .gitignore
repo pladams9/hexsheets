@@ -1,4 +1,7 @@
 /venv
 /.idea
 __pycache__/
-.pyc
+*.pyc
+/build
+/dist
+/doc_src/site
