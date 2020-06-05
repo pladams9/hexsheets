@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import font
-import ast
 
 
 class HexCells(tk.Frame):
