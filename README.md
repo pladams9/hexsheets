@@ -24,7 +24,7 @@ the latest release.
 1. Clone the repository* to your local machine.
 2. From the base directory, run `pip install -r requirements.txt`. Optionally, create a `venv`.
 3. From the `/doc_src`, run `mkdocs build` to build the documentation (under the `/src/docs/` folder.)
-4. From `/src` run `python hex-spreadsheet.py` to start HexSheets.
+4. From `/src` run `python hexsheets.py` to start HexSheets.
 
 \* There are two main branches in the repository: `master`, which represents the most recent "stable"
 release, and `develop`, which houses the most recent development version.
