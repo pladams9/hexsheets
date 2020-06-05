@@ -5,7 +5,7 @@ block_cipher = None
 with open('VERSION', 'r') as file:
     version_number = file.readline().strip()
 
-a = Analysis(['src/hex-spreadsheet.py'],
+a = Analysis(['src/hexsheets.py'],
              pathex=[''],
              binaries=[],
              datas=[('doc_src/site', 'docs')],
