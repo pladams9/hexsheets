@@ -172,6 +172,6 @@ class HexCells(tk.Frame):
 if __name__ == '__main__':
     root = tk.Tk()
     hc = HexCells(root, hex_columns=5, hex_rows=4, relief=tk.SUNKEN, bd=2)
-    hc.pack(fill=tk.BOTH, padx=10, pady=10)
+    hc.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     root.mainloop()
