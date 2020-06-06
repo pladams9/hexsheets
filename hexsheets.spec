@@ -8,7 +8,7 @@ with open('VERSION', 'r') as file:
 a = Analysis(['src/hexsheets.py'],
              pathex=[''],
              binaries=[],
-             datas=[('doc_src/site', 'docs')],
+             datas=[('src/docs', 'docs')],
              hiddenimports=[],
              hookspath=[],
              runtime_hooks=[],
