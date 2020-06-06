@@ -113,7 +113,6 @@ class HexCells(tk.Frame):
     def _create_hex_grid(self):
         self._canvas.delete(tk.ALL)
         self._cell_coords = {}
-        self._cell_entry_boxes = {}
         for cell_y in range(self._hex_rows):
             for cell_x in range(self._hex_columns):
                 canvas_x = cell_x * (self._hex_width + (self._hex_height * 0.25))
