@@ -17,6 +17,8 @@ class HexCells(tk.Frame):
         self._internal_cell_selection = None
         self._select_command = None
 
+        self._cell_values = {}
+
         super().__init__(master, **(self._custom_options(**kwargs)))
 
         # Colors
@@ -156,6 +158,9 @@ class HexCells(tk.Frame):
                 t = self._create_cell_text(canvas_x, canvas_y, self._column_widths[cell_x], self._row_heights[cell_y])
                 self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), t)
                 self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), t)
+
+        self._update_cell_values()
+
         self._canvas.config(scrollregion=self._canvas.bbox(tk.ALL))
 
     def _cell_click(self, e):
@@ -180,6 +185,10 @@ class HexCells(tk.Frame):
         self.hidden_entry.focus_set()
 
     def set_cell_values(self, values):
+        self._cell_values = values
+        self._update_cell_values()
+
+    def _update_cell_values(self):
         items = self._canvas.find_withtag('text&&has_value')
         for item in items:
             cell_label = self.nametowidget(
@@ -188,13 +197,13 @@ class HexCells(tk.Frame):
             cell_label.config(text='')
         self._canvas.dtag(items, 'has_value')
 
-        for coord in values:
+        for coord in self._cell_values:
             items = self._canvas.find_withtag('text&&col{0}&&row{1}'.format(coord[0], coord[1]))
             if items:
                 cell_label = self.nametowidget(
                     self._canvas.itemcget(items[0], 'window')
                 )
-                cell_label.config(text=values[coord])
+                cell_label.config(text=self._cell_values[coord])
                 self._canvas.addtag_withtag('has_value', items[0])
 
     def _create_column_handles(self):
@@ -289,5 +298,10 @@ if __name__ == '__main__':
     root = tk.Tk()
     hc = HexCells(root, hex_columns=10, hex_rows=8, relief=tk.SUNKEN, bd=2)
     hc.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+    hc.set_cell_values({
+        (1, 2): 'Test',
+        (2, 2): 1,
+        (3, 4): 42
+    })
 
     root.mainloop()
