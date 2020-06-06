@@ -223,7 +223,14 @@ class HexCells(tk.Frame):
 
         self._update_cell_values()
 
-        self._canvas.config(scrollregion=self._canvas.bbox(tk.ALL))
+        limits = self._canvas.bbox(tk.ALL)
+        limits = (
+            limits[0] - 1,
+            limits[1] - 1,
+            limits[2] + 2,
+            limits[3] + 2
+        )
+        self._canvas.config(scrollregion=limits)
         self._canvas.xview_moveto(0)
         self._canvas.yview_moveto(0)
 
