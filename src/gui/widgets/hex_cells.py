@@ -16,9 +16,6 @@ class HexCells(tk.Frame):
 
         super().__init__(master, **(self._custom_options(**kwargs)))
 
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
-
         # Colors
         self.colors = {
             'bg': '#BBB',
@@ -27,24 +24,43 @@ class HexCells(tk.Frame):
             'active-cell-line': '#555'
         }
 
+        # Row/Column Widgets
+        self._columns_shelf = tk.Frame(self, height=200)
+        self._columns_shelf.grid(row=0, column=1, sticky='nswe')
+        self._column_handles = []
+        self._column_ids = {}
+
+        self.rows_shelf = tk.Frame(self, width=20)
+        self.rows_shelf.grid(row=1, column=0, sticky='nswe')
+        self._row_handles = []
+        self._row_ids = []
+
+        self.resizing_id = None
+        self.resize_coord = None
+
         # Canvas
         self._canvas = tk.Canvas(self)
         self._canvas.config(bg=self.colors['bg'])
-        self._canvas.grid(column=0, row=0, sticky='nsew')
+        self._canvas.grid(column=1, row=1, sticky='nsew')
         self._canvas.bind('<Button-1>', self._cell_click)
         self._canvas_ready = True
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(1, weight=1)
+
         self._create_hex_grid()
+        self._create_column_handles()
 
         # Scrollbars
         v_scroll = tk.Scrollbar(self, command=self._canvas.yview)
-        v_scroll.grid(column=1, row=0, sticky='nsew')
+        v_scroll.grid(column=2, row=0, rowspan=2, sticky='nsew')
         h_scroll = tk.Scrollbar(self, orient=tk.HORIZONTAL, command=self._canvas.xview)
-        h_scroll.grid(column=0, row=1, sticky='nsew')
+        h_scroll.grid(column=0, columnspan=2, row=2, sticky='nsew')
         self._canvas.config(
             xscrollcommand=h_scroll.set,
             yscrollcommand=v_scroll.set
         )
 
+        # Hidden entry box TODO: Remove this entry box and move entry outside of widget
         self.hidden_entry = tk.Entry(self)
         self.hidden_entry.place(x=-100, y=-100)
 
@@ -75,6 +91,7 @@ class HexCells(tk.Frame):
 
         if self._canvas_ready and redraw_needed:
             self._create_hex_grid()
+            self._create_column_handles()
 
         # Click Command
         if 'select_command' in kwargs:
@@ -167,10 +184,61 @@ class HexCells(tk.Frame):
                 cell_label.config(text=values[coord])
                 self._canvas.addtag_withtag('has_value', items[0])
 
+    def _create_column_handles(self):
+        for column in self._column_handles:
+            column['handle'].destroy()
+            column['sash'].destroy()
+        self._column_handles = []
+        self._column_ids = {}
+
+        spacer = tk.Frame(self._columns_shelf, width=(self._hex_height*0.25) + 2.5)
+        spacer.pack(side=tk.LEFT)
+        for x in range(self._hex_columns):
+            new_column_handle = {
+                'handle': tk.Frame(self._columns_shelf, relief=tk.RAISED, bd=2, width=self._hex_width, height=20),
+                'sash': tk.Frame(self._columns_shelf, width=(self._hex_height*0.25), bg='#BBB', cursor='sb_h_double_arrow')
+            }
+            self._column_handles.append(new_column_handle)
+            self._column_ids[new_column_handle['sash'].winfo_name()] = x
+
+            self._column_handles[x]['handle'].pack(side=tk.LEFT, fill=tk.Y)
+            self._column_handles[x]['sash'].pack(side=tk.LEFT, fill=tk.Y)
+            self._column_handles[x]['sash'].bind('<Button-1>', self._start_column_resize)
+            self._column_handles[x]['sash'].bind('<ButtonRelease-1>', self._finish_column_resize)
+
+    def _start_column_resize(self, e):
+        self.resizing_id = self._column_ids[e.widget.winfo_name()]
+        self.resize_coord = e.x
+
+        # TODO: Add line to canvas to visualize resizing
+
+    def _finish_column_resize(self, e):
+        if self.resize_coord is not None:
+            diff = e.x - self.resize_coord
+            width = self._column_handles[self.resizing_id]['handle'].cget('width')
+            width += diff
+            width = max(10, width)
+            self._column_handles[self.resizing_id]['handle'].config(width=width)
+            self.resize_coord = None
+            self.resizing_id = None
+
+            # TODO: Make resizes adjust actual cell dimensions
+            # TODO: Set column sizes individually; recreate grid and columns afterward
+
+
+    def _create_row_handles(self):
+        pass
+
+    def _start_row_resize(self, e):
+        pass
+
+    def _finish_row_resize(self, e):
+        pass
+
 
 if __name__ == '__main__':
     root = tk.Tk()
-    hc = HexCells(root, hex_columns=5, hex_rows=4, relief=tk.SUNKEN, bd=2)
+    hc = HexCells(root, hex_columns=6, hex_rows=4, relief=tk.SUNKEN, bd=2)
     hc.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     root.mainloop()
