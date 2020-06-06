@@ -296,6 +296,13 @@ class HexCells(tk.Frame):
 
 if __name__ == '__main__':
     root = tk.Tk()
+
+    screen_width = root.winfo_screenwidth()
+    screen_height = root.winfo_screenheight()
+    geo_string = str(int(screen_width * 0.7)) + 'x' + str(int(screen_height * 0.7)) + \
+                 '+' + str(int(screen_width * 0.15)) + '+' + str(int(screen_height * 0.15))
+    root.geometry(geo_string)
+
     hc = HexCells(root, hex_columns=10, hex_rows=8, relief=tk.SUNKEN, bd=2)
     hc.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
     hc.set_cell_values({
