@@ -4,11 +4,14 @@ from tkinter import font
 
 class HexCells(tk.Frame):
     def __init__(self, master, **kwargs):
-        self._hex_width = 30
-        self._hex_height = 40
+        self._default_column_width = 30
+        self._default_row_height = 40
+        self._point_width = 10
         self._hex_columns = 20
         self._hex_rows = 20
+
         self._canvas_ready = False
+
         self._cell_coords = {}
         self.current_cell = None
         self._internal_cell_selection = None
@@ -25,15 +28,17 @@ class HexCells(tk.Frame):
         }
 
         # Row/Column Widgets
-        self._columns_shelf = tk.Frame(self, height=200)
+        self._columns_shelf = tk.Frame(self)
         self._columns_shelf.grid(row=0, column=1, sticky='nswe')
         self._column_handles = []
         self._column_ids = {}
+        self._column_widths = [self._default_column_width for i in range(self._hex_columns)]
 
-        self.rows_shelf = tk.Frame(self, width=20)
-        self.rows_shelf.grid(row=1, column=0, sticky='nswe')
+        self._rows_shelf = tk.Frame(self)
+        self._rows_shelf.grid(row=1, column=0, sticky='nswe')
         self._row_handles = []
         self._row_ids = []
+        self._row_heights = [self._default_row_height for i in range(self._hex_rows)]
 
         self.resizing_id = None
         self.resize_coord = None
@@ -49,6 +54,7 @@ class HexCells(tk.Frame):
 
         self._create_hex_grid()
         self._create_column_handles()
+        self._create_row_handles()
 
         # Scrollbars
         v_scroll = tk.Scrollbar(self, command=self._canvas.yview)
@@ -71,11 +77,12 @@ class HexCells(tk.Frame):
         redraw_needed = False
         # Hex Dimensions
         if 'hex_width' in kwargs:
-            self._hex_width = kwargs['hex_width']
+            self._default_column_width = kwargs['hex_width']
             kwargs.pop('hex_width')
             redraw_needed = True
         if 'hex_height' in kwargs:
-            self._hex_height = kwargs['hex_height']
+            self._default_row_height = kwargs['hex_height']
+            self._point_width = self._default_row_height / 4
             kwargs.pop('hex_height')
             redraw_needed = True
 
@@ -100,14 +107,15 @@ class HexCells(tk.Frame):
 
         return kwargs
 
-    def _create_hex(self, x, y, width, height):
+    def _create_hex(self, x, y, width, top_height, bottom_height):
+        full_height = top_height + bottom_height
         hex_coords = [
             x, y,
             x + width, y,
-            x + width + (height * 0.25), y + (height / 2),
-            x + width, y + height,
-            x, y + height,
-            x - (height * 0.25), y + (height / 2)
+            x + width + self._point_width, y + top_height,
+            x + width, y + full_height,
+            x, y + full_height,
+            x - self._point_width, y + top_height
         ]
         hex_shape = self._canvas.create_polygon(hex_coords,
                                                 fill=self.colors['cell-bg'],
@@ -130,17 +138,22 @@ class HexCells(tk.Frame):
     def _create_hex_grid(self):
         self._canvas.delete(tk.ALL)
         self._cell_coords = {}
+
         for cell_y in range(self._hex_rows):
             for cell_x in range(self._hex_columns):
-                canvas_x = cell_x * (self._hex_width + (self._hex_height * 0.25))
-                canvas_y = (cell_y * self._hex_height) + [0, self._hex_height / 2][cell_x % 2]
-                h = self._create_hex(canvas_x, canvas_y,
-                                     self._hex_width, self._hex_height)
+                canvas_x = sum(w + self._point_width for w in self._column_widths[0:cell_x])
+                canvas_y = sum(self._row_heights[0:cell_y]) + [0, self._row_heights[cell_y] / 2][cell_x % 2]
+
+                if ((cell_x % 2) != 0) and (cell_y + 1 != self._hex_rows):
+                    h = self._create_hex(canvas_x, canvas_y, self._column_widths[cell_x], self._row_heights[cell_y] / 2, self._row_heights[cell_y + 1] / 2)
+                else:
+                    h = self._create_hex(canvas_x, canvas_y, self._column_widths[cell_x], self._row_heights[cell_y] / 2, self._row_heights[cell_y] / 2)
+
                 self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), h)
                 self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), h)
                 self._cell_coords[h] = (cell_x, cell_y)
 
-                t = self._create_cell_text(canvas_x, canvas_y, self._hex_width, self._hex_height)
+                t = self._create_cell_text(canvas_x, canvas_y, self._column_widths[cell_x], self._row_heights[cell_y])
                 self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), t)
                 self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), t)
         self._canvas.config(scrollregion=self._canvas.bbox(tk.ALL))
@@ -191,12 +204,12 @@ class HexCells(tk.Frame):
         self._column_handles = []
         self._column_ids = {}
 
-        spacer = tk.Frame(self._columns_shelf, width=(self._hex_height*0.25) + 2.5)
+        spacer = tk.Frame(self._columns_shelf, width=(self._point_width + 2.5))
         spacer.pack(side=tk.LEFT)
         for x in range(self._hex_columns):
             new_column_handle = {
-                'handle': tk.Frame(self._columns_shelf, relief=tk.RAISED, bd=2, width=self._hex_width, height=20),
-                'sash': tk.Frame(self._columns_shelf, width=(self._hex_height*0.25), bg='#BBB', cursor='sb_h_double_arrow')
+                'handle': tk.Frame(self._columns_shelf, relief=tk.RAISED, bd=2, width=self._column_widths[x], height=20),
+                'sash': tk.Frame(self._columns_shelf, width=self._point_width, bg='#BBB', cursor='sb_h_double_arrow')
             }
             self._column_handles.append(new_column_handle)
             self._column_ids[new_column_handle['sash'].winfo_name()] = x
@@ -219,26 +232,62 @@ class HexCells(tk.Frame):
             width += diff
             width = max(10, width)
             self._column_handles[self.resizing_id]['handle'].config(width=width)
+            self._column_widths[self.resizing_id] = width
+
             self.resize_coord = None
             self.resizing_id = None
 
-            # TODO: Make resizes adjust actual cell dimensions
-            # TODO: Set column sizes individually; recreate grid and columns afterward
-
+            self._create_hex_grid()
 
     def _create_row_handles(self):
-        pass
+        for row in self._row_handles:
+            row['handle'].destroy()
+            row['sash'].destroy()
+        self._row_handles = []
+        self._row_ids = {}
+
+        spacer = tk.Frame(self._rows_shelf, height=2)
+        spacer.pack(side=tk.TOP)
+
+        for y in range(self._hex_rows):
+            new_row_handle = {
+                'handle': tk.Frame(self._rows_shelf, relief=tk.RAISED, bd=2, height=self._row_heights[y] - 2,
+                                   width=20),
+                'sash': tk.Frame(self._rows_shelf, height=2, bg='#BBB',
+                                 cursor='sb_v_double_arrow')
+            }
+            self._row_handles.append(new_row_handle)
+            self._row_ids[new_row_handle['sash'].winfo_name()] = y
+
+            self._row_handles[y]['handle'].pack(side=tk.TOP, fill=tk.X)
+            self._row_handles[y]['sash'].pack(side=tk.TOP, fill=tk.X)
+            self._row_handles[y]['sash'].bind('<Button-1>', self._start_row_resize)
+            self._row_handles[y]['sash'].bind('<ButtonRelease-1>', self._finish_row_resize)
 
     def _start_row_resize(self, e):
-        pass
+        self.resizing_id = self._row_ids[e.widget.winfo_name()]
+        self.resize_coord = e.y
+
+        # TODO: Add line to canvas to visualize resizing
 
     def _finish_row_resize(self, e):
-        pass
+        if self.resize_coord is not None:
+            diff = e.y - self.resize_coord
+            height = self._row_handles[self.resizing_id]['handle'].cget('height')
+            height += diff
+            height = max(10, height)
+            self._row_handles[self.resizing_id]['handle'].config(height=height)
+            self._row_heights[self.resizing_id] = height
+
+            self.resize_coord = None
+            self.resizing_id = None
+
+            self._create_hex_grid()
 
 
 if __name__ == '__main__':
     root = tk.Tk()
-    hc = HexCells(root, hex_columns=6, hex_rows=4, relief=tk.SUNKEN, bd=2)
+    hc = HexCells(root, hex_columns=10, hex_rows=8, relief=tk.SUNKEN, bd=2)
     hc.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
     root.mainloop()
