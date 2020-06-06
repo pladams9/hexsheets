@@ -279,10 +279,9 @@ class HexCells(tk.Frame):
     def _finish_column_resize(self, e):
         if self.resize_coord is not None:
             diff = e.x - self.resize_coord
-            width = self._column_handles[self.resizing_id]['handle'].cget('width')
+            width = self._column_widths[self.resizing_id]
             width += diff
             width = max(10, width)
-            self._column_handles[self.resizing_id]['handle'].config(width=width)
             self._column_widths[self.resizing_id] = width
 
             self.resize_coord = None
@@ -299,10 +298,9 @@ class HexCells(tk.Frame):
     def _finish_row_resize(self, e):
         if self.resize_coord is not None:
             diff = e.y - self.resize_coord
-            height = self._row_handles[self.resizing_id]['handle'].cget('height')
+            height = self._row_heights[self.resizing_id]
             height += diff
             height = max(10, height)
-            self._row_handles[self.resizing_id]['handle'].config(height=height)
             self._row_heights[self.resizing_id] = height
 
             self.resize_coord = None
