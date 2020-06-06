@@ -30,10 +30,14 @@ class HexCells(tk.Frame):
         }
 
         # Row/Column Widgets
+        self._column_shelf = tk.Canvas(self, height=20)
+        self._column_shelf.grid(column=1, row=0, sticky='nsew')
         self._column_handles = []
         self._column_ids = {}
         self._column_widths = [self._default_column_width for i in range(self._hex_columns)]
 
+        self._row_shelf = tk.Canvas(self, width=20)
+        self._row_shelf.grid(column=0, row=1, sticky='nsew')
         self._row_handles = []
         self._row_ids = []
         self._row_heights = [self._default_row_height for i in range(self._hex_rows)]
@@ -44,24 +48,41 @@ class HexCells(tk.Frame):
         # Canvas
         self._canvas = tk.Canvas(self)
         self._canvas.config(bg=self.colors['bg'])
-        self._canvas.grid(column=0, row=0, sticky='nsew')
+        self._canvas.grid(column=1, row=1, sticky='nsew')
         self._canvas.bind('<Button-1>', self._cell_click)
         self._canvas_ready = True
-        self.columnconfigure(0, weight=1)
-        self.rowconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
+        self.rowconfigure(1, weight=1)
+
+        # Build out canvas
+        self._build_canvas_items()
 
         # Scrollbars
-        self._v_scroll = tk.Scrollbar(self, command=self._canvas.yview)
-        self._v_scroll.grid(column=1, row=0, sticky='nsew')
-        self._h_scroll = tk.Scrollbar(self, orient=tk.HORIZONTAL, command=self._canvas.xview)
-        self._h_scroll.grid(column=0, row=1, sticky='nsew')
+        self._v_scroll = tk.Scrollbar(self)
+        self._v_scroll.grid(column=2, row=1, sticky='nsew')
+        self._h_scroll = tk.Scrollbar(self, orient=tk.HORIZONTAL)
+        self._h_scroll.grid(column=1, row=2, sticky='nsew')
+
         self._canvas.config(
             xscrollcommand=self._h_scroll.set,
             yscrollcommand=self._v_scroll.set
         )
 
-        # Build out canvas
-        self._build_canvas_items()
+        def y_scroll(*args):
+            self._canvas.yview(*args)
+            self._row_shelf.yview(*args)
+        self._v_scroll.config(command=y_scroll)
+        self._canvas.yview_moveto(0)
+        self._row_shelf.yview_moveto(0)
+
+        def x_scroll(*args):
+            self._canvas.xview(*args)
+            self._column_shelf.xview(*args)
+        self._h_scroll.config(command=x_scroll)
+        self._canvas.xview_moveto(0)
+        self._column_shelf.xview_moveto(0)
+
+
 
         # Hidden entry box TODO: Remove this entry box and move entry outside of widget
         self.hidden_entry = tk.Entry(self)
@@ -132,6 +153,9 @@ class HexCells(tk.Frame):
         return cell_text
 
     def _create_hex_grid(self):
+        self._canvas.delete(tk.ALL)
+        self._cell_coords = {}
+
         for cell_y in range(self._hex_rows):
             for cell_x in range(self._hex_columns):
                 canvas_x = sum(w + self._point_width for w in self._column_widths[0:cell_x])
@@ -152,7 +176,16 @@ class HexCells(tk.Frame):
                 self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), t)
                 self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), t)
 
+        limits = (
+            -self._point_width - 1,
+            -1,
+            sum(self._column_widths) + (self._hex_columns * self._point_width) + 1,
+            sum(self._row_heights) + (self._row_heights[-1] / 2) + 1
+        )
+        self._canvas.config(scrollregion=limits)
+
     def _create_column_handles(self):
+        self._column_shelf.delete(tk.ALL)
         for column in self._column_handles:
             column['handle'].destroy()
             column['sash'].destroy()
@@ -161,8 +194,8 @@ class HexCells(tk.Frame):
 
         for x in range(self._hex_columns):
             new_column_handle = {
-                'handle': tk.Frame(self._canvas, relief=tk.RAISED, bd=2),
-                'sash': tk.Frame(self._canvas, width=self._point_width, bg='#BBB', cursor='sb_h_double_arrow')
+                'handle': tk.Frame(self._column_shelf, relief=tk.RAISED, bd=2),
+                'sash': tk.Frame(self._column_shelf, width=self._point_width, bg='#BBB', cursor='sb_h_double_arrow')
             }
 
             self._column_handles.append(new_column_handle)
@@ -171,19 +204,28 @@ class HexCells(tk.Frame):
             self._column_handles[x]['sash'].bind('<Button-1>', self._start_column_resize)
             self._column_handles[x]['sash'].bind('<ButtonRelease-1>', self._finish_column_resize)
 
-            handle = self._canvas.create_window(
-                sum(self._column_widths[:x]) + (x * self._point_width), -22,
+            handle = self._column_shelf.create_window(
+                sum(self._column_widths[:x]) + (x * self._point_width), 0,
                 anchor=tk.NW, width=self._column_widths[x], height=20,
                 window=new_column_handle['handle'], tag='col-handle')
-            self._canvas.addtag_withtag(''.join(['col', str(x)]), handle)
+            self._column_shelf.addtag_withtag(''.join(['col', str(x)]), handle)
 
-            sash = self._canvas.create_window(
-                sum(self._column_widths[:(x+1)]) + (x * self._point_width), -22,
+            sash = self._column_shelf.create_window(
+                sum(self._column_widths[:(x+1)]) + (x * self._point_width), 0,
                 anchor=tk.NW, width=self._point_width, height=20,
                 window=new_column_handle['sash'], tag='col-sash')
-            self._canvas.addtag_withtag(''.join(['col', str(x)]), sash)
+            self._column_shelf.addtag_withtag(''.join(['col', str(x)]), sash)
+
+        limits = (
+            -self._point_width - 1,
+            0,
+            sum(self._column_widths) + (self._hex_columns * self._point_width),
+            20
+        )
+        self._column_shelf.config(scrollregion=limits)
 
     def _create_row_handles(self):
+        self._row_shelf.delete(tk.ALL)
         for row in self._row_handles:
             row['handle'].destroy()
             row['sash'].destroy()
@@ -192,8 +234,8 @@ class HexCells(tk.Frame):
 
         for y in range(self._hex_rows):
             new_row_handle = {
-                'handle': tk.Frame(self._canvas, relief=tk.RAISED, bd=2),
-                'sash': tk.Frame(self._canvas, bg='#BBB', cursor='sb_v_double_arrow')
+                'handle': tk.Frame(self._row_shelf, relief=tk.RAISED, bd=2),
+                'sash': tk.Frame(self._row_shelf, bg='#BBB', cursor='sb_v_double_arrow')
             }
             self._row_handles.append(new_row_handle)
             self._row_ids[new_row_handle['sash'].winfo_name()] = y
@@ -201,38 +243,32 @@ class HexCells(tk.Frame):
             self._row_handles[y]['sash'].bind('<Button-1>', self._start_row_resize)
             self._row_handles[y]['sash'].bind('<ButtonRelease-1>', self._finish_row_resize)
 
-            handle = self._canvas.create_window(
-                -22 - self._point_width, sum(self._row_heights[:y]) + 2,
+            handle = self._row_shelf.create_window(
+                0, sum(self._row_heights[:y]) + 2,
                 anchor=tk.NW, height=self._row_heights[y]-4, width=20,
                 window=new_row_handle['handle'], tag='col-handle')
-            self._canvas.addtag_withtag(''.join(['col', str(y)]), handle)
+            self._row_shelf.addtag_withtag(''.join(['col', str(y)]), handle)
 
-            sash = self._canvas.create_window(
-                -22 - self._point_width, sum(self._row_heights[:(y+1)]) - 2,
+            sash = self._row_shelf.create_window(
+                0, sum(self._row_heights[:(y+1)]) - 2,
                 anchor=tk.NW, height=4, width=20,
                 window=new_row_handle['sash'], tag='row-handle')
-            self._canvas.addtag_withtag(''.join(['col', str(y)]), sash)
+            self._row_shelf.addtag_withtag(''.join(['col', str(y)]), sash)
+
+        limits = (
+            0,
+            -2,
+            20,
+            sum(self._row_heights) + (self._row_heights[-1] / 2) + 4
+        )
+        self._row_shelf.config(scrollregion=limits)
 
     def _build_canvas_items(self):
-        self._canvas.delete(tk.ALL)
-        self._cell_coords = {}
-
         self._create_hex_grid()
         self._create_column_handles()
         self._create_row_handles()
 
         self._update_cell_values()
-
-        limits = self._canvas.bbox(tk.ALL)
-        limits = (
-            limits[0] - 1,
-            limits[1] - 1,
-            limits[2] + 2,
-            limits[3] + 2
-        )
-        self._canvas.config(scrollregion=limits)
-        self._canvas.xview_moveto(0)
-        self._canvas.yview_moveto(0)
 
     def _cell_click(self, e):
         canvas_x = self._canvas.canvasx(e.widget.winfo_x() + e.x)
@@ -325,7 +361,7 @@ if __name__ == '__main__':
         '+' + str(int(screen_width * 0.15)) + '+' + str(int(screen_height * 0.15))
     root.geometry(geo_string)
 
-    hc = HexCells(root, hex_columns=10, hex_rows=8, relief=tk.SUNKEN, bd=2)
+    hc = HexCells(root, hex_columns=20, hex_rows=20, relief=tk.SUNKEN, bd=2)
     hc.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
     hc.set_cell_values({
         (1, 2): 'Test',
