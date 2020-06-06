@@ -1,2 +1,7 @@
-site_name: HexSheets v0.1
+site_name: HexSheets
 use_directory_urls: false
+repo_url: https://github.com/pladams9/hexsheets/
+site_dir: ../src/docs
+theme:
+    name: mkdocs
+    custom_dir: hex_theme/

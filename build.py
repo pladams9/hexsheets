@@ -8,7 +8,7 @@ subprocess.run(['mkdocs', 'build', '--clean'])
 os.chdir('..')
 
 # Build executable/bundle
-subprocess.run(['pyinstaller', '--clean', '--noconfirm', 'hex-spreadsheet.spec'])
+subprocess.run(['pyinstaller', '--clean', '--noconfirm', 'hexsheets.spec'])
 
 # Clean up build directories
 try:
