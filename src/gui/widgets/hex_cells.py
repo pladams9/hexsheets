@@ -317,6 +317,19 @@ class HexCells(tk.Frame):
         self.resizing_id = self._column_ids[e.widget.winfo_name()]
         self.resize_coord = e.x
 
+        def update_line():
+            self._canvas.delete('resize_line')
+
+            if self.resizing_id is not None:
+                x = self._canvas.canvasx(self.winfo_pointerx() - self._canvas.winfo_rootx())
+
+                line = self._canvas.create_line(x, 0, x, 1000)
+                self._canvas.addtag_withtag('resize_line', line)
+
+                self.after(33, update_line)
+
+        update_line()
+
         # TODO: Add line to canvas to visualize resizing
 
     def _finish_column_resize(self, e):
@@ -336,7 +349,20 @@ class HexCells(tk.Frame):
         self.resizing_id = self._row_ids[e.widget.winfo_name()]
         self.resize_coord = e.y
 
-        # TODO: Add line to canvas to visualize resizing
+        def update_line():
+            self._canvas.delete('resize_line')
+
+            if self.resizing_id is not None:
+                y = self._canvas.canvasy(self.winfo_pointery() - self._canvas.winfo_rooty())
+
+                # TODO: change line length to match current window
+
+                line = self._canvas.create_line(0, y, 1000, y)
+                self._canvas.addtag_withtag('resize_line', line)
+
+                self.after(33, update_line)
+
+        update_line()
 
     def _finish_row_resize(self, e):
         if self.resize_coord is not None:
