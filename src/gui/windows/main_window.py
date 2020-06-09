@@ -57,9 +57,16 @@ class MainWindow:
         self.formula_box.pack(fill=tk.X)
         self.parent_view.add_observer('formula_box', self.update_formula_box)
 
-        self.spreadsheet = gui.widgets.HexCells(mainframe, hex_rows=20, hex_columns=20, select_command=self.select_cell)
+        self.spreadsheet = gui.widgets.HexCells(mainframe,
+                                                hex_rows=20, hex_columns=20,
+                                                select_command=self.select_cell,
+                                                resize_row_command=self.resize_row,
+                                                resize_column_command=self.resize_column
+        )
         self.spreadsheet.grid(column=0, row=1, sticky='nsew')
         self.parent_view.add_observer('cell_values', self.spreadsheet.set_cell_values)
+        self.parent_view.add_observer('row_sizes', self.spreadsheet.set_row_sizes)
+        self.parent_view.add_observer('column_sizes', self.spreadsheet.set_column_sizes)
 
         self._formula_boxes = [
             self.formula_box,
@@ -100,6 +107,18 @@ class MainWindow:
 
     def select_cell(self, address):
         self.parent_view.add_event(event.Event('CellSelected', {'address': address}))
+
+    def resize_row(self, row, height):
+        self.parent_view.add_event(event.Event('RowResized', {
+            'row': row,
+            'height': height
+        }))
+
+    def resize_column(self, column, width):
+        self.parent_view.add_event(event.Event('ColumnResized', {
+            'column': column,
+            'width': width
+        }))
 
     def _new_file(self):
         self.parent_view.add_event(event.Event('NewFile'))
