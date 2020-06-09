@@ -142,12 +142,12 @@ class HexCells(tk.Frame):
         return hex_shape
 
     def _create_cell_text(self, x, y, width, height):
-        cell_label = tk.Label(self._canvas, font=font.Font(size=-int(height / 3)), anchor=tk.W)
+        cell_label = tk.Label(self._canvas, font=font.Font(size=10), anchor=tk.W)
         cell_label.bindtags((str(self._canvas), 'Label', '.', 'all'))
 
         cell_text = self._canvas.create_window(
-            x, y + (height / 4),
-            anchor=tk.NW, width=width, height=int(height / 2),
+            x, y+1,
+            anchor=tk.NW, width=width, height=height-2,
             window=cell_label, tag='text')
 
         return cell_text
@@ -164,15 +164,21 @@ class HexCells(tk.Frame):
                 if ((cell_x % 2) != 0) and (cell_y + 1 != self._hex_rows):
                     h = self._create_hex(canvas_x, canvas_y, self._column_widths[cell_x], self._row_heights[cell_y] / 2,
                                          self._row_heights[cell_y + 1] / 2)
+                    t = self._create_cell_text(canvas_x,
+                                               canvas_y,
+                                               self._column_widths[cell_x],
+                                               (self._row_heights[cell_y] + self._row_heights[cell_y + 1]) / 2)
                 else:
                     h = self._create_hex(canvas_x, canvas_y, self._column_widths[cell_x], self._row_heights[cell_y] / 2,
                                          self._row_heights[cell_y] / 2)
+                    t = self._create_cell_text(canvas_x, canvas_y, self._column_widths[cell_x],
+                                               self._row_heights[cell_y])
 
                 self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), h)
                 self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), h)
                 self._cell_coords[h] = (cell_x, cell_y)
 
-                t = self._create_cell_text(canvas_x, canvas_y, self._column_widths[cell_x], self._row_heights[cell_y])
+
                 self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), t)
                 self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), t)
 
