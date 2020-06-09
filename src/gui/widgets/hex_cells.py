@@ -17,6 +17,9 @@ class HexCells(tk.Frame):
         self._internal_cell_selection = None
         self._select_command = None
 
+        self._resize_row_command = None
+        self._resize_column_command = None
+
         self._cell_values = {}
 
         super().__init__(master, **(self._custom_options(**kwargs)))
@@ -121,6 +124,15 @@ class HexCells(tk.Frame):
         if 'select_command' in kwargs:
             self._select_command = kwargs['select_command']
             kwargs.pop('select_command')
+
+        # Resize Commands
+        if 'resize_row_command' in kwargs:
+            self.resize_row_command = kwargs['resize_row_command']
+            kwargs.pop('resize_row_command')
+
+        if 'resize_column_command' in kwargs:
+            self._resize_column_command = kwargs['resize_column_command']
+            kwargs.pop('resize_column_command')
 
         return kwargs
 
@@ -346,10 +358,26 @@ class HexCells(tk.Frame):
             width = max(10, width)
             self._column_widths[self.resizing_id] = width
 
+            self._build_canvas_items()
+
+            if self._resize_column_command:
+                self._resize_column_command(self.resizing_id, width)
+
             self.resize_coord = None
             self.resizing_id = None
 
-            self._build_canvas_items()
+    def set_column_sizes(self, column_sizes):
+        self._column_widths = []
+        if -1 in column_sizes:
+            self._default_column_width = column_sizes[-1]
+
+        for column in range(self._hex_columns):
+            if column in column_sizes:
+                self._column_widths.append(column_sizes[column])
+            else:
+                self._column_widths.append(self._default_column_width)
+
+        self._build_canvas_items()
 
     def _start_row_resize(self, e):
         self.resizing_id = self._row_ids[e.widget.winfo_name()]
@@ -378,10 +406,26 @@ class HexCells(tk.Frame):
             height = max(10, height)
             self._row_heights[self.resizing_id] = height
 
+            self._build_canvas_items()
+
+            if self._resize_row_command:
+                self._resize_row_command(self.resizing_id, height)
+
             self.resize_coord = None
             self.resizing_id = None
 
-            self._build_canvas_items()
+    def set_row_sizes(self, row_sizes):
+        self._row_heights = []
+        if -1 in row_sizes:
+            self._default_row_height = row_sizes[-1]
+
+        for row in range(self._hex_rows):
+            if row in row_sizes:
+                self._row_heights.append(row_sizes[row])
+            else:
+                self._row_heights.append(self._default_row_height)
+
+        self._build_canvas_items()
 
 
 if __name__ == '__main__':
