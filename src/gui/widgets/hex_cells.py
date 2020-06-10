@@ -301,13 +301,14 @@ class HexCells(tk.Frame):
         self._update_cell_values()
 
     def _cell_click(self, e):
-        canvas_x = self._canvas.canvasx(e.widget.winfo_x() + e.x)
-        canvas_y = self._canvas.canvasy(e.widget.winfo_y() + e.y)
+        canvas_x = self._canvas.canvasx(e.x)
+        canvas_y = self._canvas.canvasy(e.y)
 
         self._canvas.dtag('clicked', 'clicked')
         self._canvas.addtag_overlapping('clicked', canvas_x, canvas_y, canvas_x, canvas_y)
 
         self._canvas.itemconfig('hex', width=1, outline=self.colors['cell-line'])
+
         matching_cells = self._canvas.find_withtag('clicked && hex')
         if matching_cells:
             cell = matching_cells[0]
