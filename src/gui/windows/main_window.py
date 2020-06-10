@@ -1,6 +1,7 @@
 from tk_mvc import BaseWindow
 import tkinter as tk
 import tkinter.filedialog as fd
+import tkinter.font as tkf
 import gui.widgets
 from tk_mvc import event
 import webbrowser
@@ -38,17 +39,20 @@ class MainWindow(BaseWindow):
         self.rowconfigure(1, weight=1)
         self.columnconfigure(0, weight=1)
 
+
+        # Top Area
         top_bar = tk.Frame(self)
         top_bar.grid(column=0, row=0, sticky='nsew')
         top_bar.columnconfigure(0, weight=1)
 
-        # TODO: Add buttons on the tool bar
-        '''
+        # Tool Bar
         tool_bar = tk.Frame(top_bar)
-        tk.Button(tool_bar, text='Test').pack(side=tk.LEFT)
+        tk.Button(tool_bar, text='B', font=tkf.Font(weight='bold')).pack(side=tk.LEFT, fill=tk.Y)
+        tk.Button(tool_bar, text='I', font=tkf.Font(slant='italic')).pack(side=tk.LEFT, fill=tk.Y)
+        tk.Button(tool_bar, text='U', font=tkf.Font(underline=1)).pack(side=tk.LEFT, fill=tk.Y)
         tool_bar.grid(column=0, row=0, sticky='we')
-        '''
 
+        # Formula Bar
         formula_bar = tk.Frame(top_bar)
         formula_bar.grid(column=0, row=1, sticky='we')
         tk.Label(formula_bar, text='Formula:').pack(side=tk.LEFT)
@@ -57,6 +61,7 @@ class MainWindow(BaseWindow):
         self.formula_box.pack(fill=tk.X)
         self._view.add_observer('formula_box', self.update_formula_box)
 
+        # Spreadsheet Area
         self.spreadsheet = gui.widgets.HexCells(self,
                                                 hex_rows=20, hex_columns=20,
                                                 select_command=self.select_cell,
@@ -68,6 +73,7 @@ class MainWindow(BaseWindow):
         self._view.add_observer('row_sizes', self.spreadsheet.set_row_sizes)
         self._view.add_observer('column_sizes', self.spreadsheet.set_column_sizes)
 
+        # Formula Box Commands
         self._formula_boxes = [
             self.formula_box,
             self.spreadsheet.hidden_entry
