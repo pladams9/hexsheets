@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import font
+from PIL import Image, ImageTk, ImageDraw, ImageFont
 
 
 class HexCells(tk.Frame):
@@ -11,6 +12,8 @@ class HexCells(tk.Frame):
         self._hex_rows = 20
 
         self._canvas_ready = False
+
+        self._tk_images = []
 
         self._cell_coords = {}
         self.current_cell = None
@@ -74,6 +77,7 @@ class HexCells(tk.Frame):
         def y_scroll(*args):
             self._canvas.yview(*args)
             self._row_shelf.yview(*args)
+
         self._v_scroll.config(command=y_scroll)
         self._canvas.yview_moveto(0)
         self._row_shelf.yview_moveto(0)
@@ -81,11 +85,10 @@ class HexCells(tk.Frame):
         def x_scroll(*args):
             self._canvas.xview(*args)
             self._column_shelf.xview(*args)
+
         self._h_scroll.config(command=x_scroll)
         self._canvas.xview_moveto(0)
         self._column_shelf.xview_moveto(0)
-
-
 
         # Hidden entry box TODO: Remove this entry box and move entry outside of widget
         self.hidden_entry = tk.Entry(self)
@@ -153,19 +156,29 @@ class HexCells(tk.Frame):
                                                 )
         return hex_shape
 
+    def _create_cell_text_image(self, width, height, text=''):
+        cell_text_image = Image.new('RGBA', (int(width), int(height)), (0, 0, 0, 0))
+
+        font_size = 14
+        PILfont = ImageFont.truetype('arial.ttf', font_size)
+        draw = ImageDraw.Draw(cell_text_image)
+        draw.text((0, (height - font_size) / 2), str(text), fill=(0, 0, 0), font=PILfont)
+
+        cell_tk_image = ImageTk.PhotoImage(image=cell_text_image)
+        self._tk_images.append(cell_tk_image)
+
+        return cell_tk_image
+
     def _create_cell_text(self, x, y, width, height):
-        cell_label = tk.Label(self._canvas, font=font.Font(size=10), anchor=tk.W)
-        cell_label.bindtags((str(self._canvas), 'Label', '.', 'all'))
+        cell_tk_image = self._create_cell_text_image(width, height)
 
-        cell_text = self._canvas.create_window(
-            x, y+1,
-            anchor=tk.NW, width=width, height=height-2,
-            window=cell_label, tag='text')
+        cell_text_canvas_item = self._canvas.create_image(x, y, image=cell_tk_image, anchor=tk.NW, tag='text')
 
-        return cell_text
+        return cell_text_canvas_item
 
     def _create_hex_grid(self):
         self._canvas.delete(tk.ALL)
+        self._tk_images = []
         self._cell_coords = {}
 
         for cell_y in range(self._hex_rows):
@@ -189,7 +202,6 @@ class HexCells(tk.Frame):
                 self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), h)
                 self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), h)
                 self._cell_coords[h] = (cell_x, cell_y)
-
 
                 self._canvas.addtag_withtag(''.join(['col', str(cell_x)]), t)
                 self._canvas.addtag_withtag(''.join(['row', str(cell_y)]), t)
@@ -229,7 +241,7 @@ class HexCells(tk.Frame):
             self._column_shelf.addtag_withtag(''.join(['col', str(x)]), handle)
 
             sash = self._column_shelf.create_window(
-                sum(self._column_widths[:(x+1)]) + (x * self._point_width), 0,
+                sum(self._column_widths[:(x + 1)]) + (x * self._point_width), 0,
                 anchor=tk.NW, width=self._point_width, height=20,
                 window=new_column_handle['sash'], tag='col-sash')
             self._column_shelf.addtag_withtag(''.join(['col', str(x)]), sash)
@@ -263,12 +275,12 @@ class HexCells(tk.Frame):
 
             handle = self._row_shelf.create_window(
                 0, sum(self._row_heights[:y]) + 2,
-                anchor=tk.NW, height=self._row_heights[y]-4, width=20,
+                anchor=tk.NW, height=self._row_heights[y] - 4, width=20,
                 window=new_row_handle['handle'], tag='col-handle')
             self._row_shelf.addtag_withtag(''.join(['col', str(y)]), handle)
 
             sash = self._row_shelf.create_window(
-                0, sum(self._row_heights[:(y+1)]) - 2,
+                0, sum(self._row_heights[:(y + 1)]) - 2,
                 anchor=tk.NW, height=4, width=20,
                 window=new_row_handle['sash'], tag='row-handle')
             self._row_shelf.addtag_withtag(''.join(['col', str(y)]), sash)
@@ -302,6 +314,8 @@ class HexCells(tk.Frame):
             self._canvas.itemconfig(cell, width=2, outline=self.colors['active-cell-line'])
             self._canvas.tag_raise(cell)
 
+            self._canvas.tag_raise('text')
+
             self.current_cell = self._cell_coords[cell]
 
             if self._select_command:
@@ -315,20 +329,16 @@ class HexCells(tk.Frame):
 
     def _update_cell_values(self):
         items = self._canvas.find_withtag('text&&has_value')
+        self._tk_images = []
         for item in items:
-            cell_label = self.nametowidget(
-                self._canvas.itemcget(item, 'window')
-            )
-            cell_label.config(text='')
+            self._canvas.itemconfig(item, image=None)
         self._canvas.dtag(items, 'has_value')
 
         for coord in self._cell_values:
             items = self._canvas.find_withtag('text&&col{0}&&row{1}'.format(coord[0], coord[1]))
             if items:
-                cell_label = self.nametowidget(
-                    self._canvas.itemcget(items[0], 'window')
-                )
-                cell_label.config(text=self._cell_values[coord])
+                cell_text_image = self._create_cell_text_image(self._column_widths[coord[0]], self._row_heights[coord[1]], self._cell_values[coord])
+                self._canvas.itemconfig(items[0], image=cell_text_image)
                 self._canvas.addtag_withtag('has_value', items[0])
 
     def _start_column_resize(self, e):
@@ -434,7 +444,7 @@ if __name__ == '__main__':
     screen_width = root.winfo_screenwidth()
     screen_height = root.winfo_screenheight()
     geo_string = str(int(screen_width * 0.7)) + 'x' + str(int(screen_height * 0.7)) + \
-        '+' + str(int(screen_width * 0.15)) + '+' + str(int(screen_height * 0.15))
+                 '+' + str(int(screen_width * 0.15)) + '+' + str(int(screen_height * 0.15))
     root.geometry(geo_string)
 
     hc = HexCells(root, hex_columns=20, hex_rows=20, relief=tk.SUNKEN, bd=2)
