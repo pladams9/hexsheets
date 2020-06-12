@@ -1,7 +1,7 @@
 import tkinter as tk
 import tkinter.filedialog as fd
 import gui.widgets
-import event
+from tk_mvc import event
 import webbrowser
 import os
 

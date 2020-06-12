@@ -1,4 +1,4 @@
-import view
+import hexsheets_view
 import tkinter as tk
 import model
 
@@ -7,7 +7,7 @@ class Controller:
     def __init__(self):
         self.model = model.Model()
         self.tk_root = tk.Tk()
-        self.view = view.View(self.tk_root)
+        self.view = hexsheets_view.HexSheetsView(self.tk_root)
 
         self._event_handlers = {
             'FormulaChanged': self.formula_changed,

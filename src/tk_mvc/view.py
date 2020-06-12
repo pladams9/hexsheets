@@ -1,16 +1,8 @@
-import tkinter as tk
-import gui.windows
-import event
-
-
 class View:
-    def __init__(self, root):
-        self.root = root
+    def __init__(self, tk_root):
+        self._tk_root = tk_root
         self._observers = {}
         self._events = []
-
-        # Windows
-        self.main_window = gui.windows.MainWindow(self, root)
 
     def add_observer(self, name, callback):
         self._observers[name] = callback
