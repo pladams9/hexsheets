@@ -9,7 +9,7 @@ class BaseWindow(Frame):
     upon creation.
     """
 
-    def __init__(self, view: View, parent_toplevel: Toplevel):
+    def __init__(self, view: View, parent_toplevel: Toplevel) -> None:
         super().__init__(parent_toplevel)
         self._view = view
         self._parent_toplevel = parent_toplevel
