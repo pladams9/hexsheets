@@ -15,8 +15,8 @@ class MainWindow(BaseWindow):
 
         self._view.add_observer('title', self.update_title)
 
-        menu_bar = tk.Menu(parent)
-        parent.configure(menu=menu_bar)
+        menu_bar = tk.Menu(_parent_toplevel)
+        _parent_toplevel.configure(menu=menu_bar)
 
         self.file_menu = tk.Menu(menu_bar, tearoff=0)
         self.file_menu.add_command(label="New", command=self._new_file)
@@ -32,9 +32,9 @@ class MainWindow(BaseWindow):
 
         menu_bar.add_command(label='Help', command=self._help)
 
-        parent.rowconfigure(0, weight=1)
-        parent.columnconfigure(0, weight=1)
-        mainframe = tk.Frame(parent)
+        _parent_toplevel.rowconfigure(0, weight=1)
+        _parent_toplevel.columnconfigure(0, weight=1)
+        mainframe = tk.Frame(_parent_toplevel)
         mainframe.grid(sticky='nsew')
         mainframe.rowconfigure(1, weight=1)
         mainframe.columnconfigure(0, weight=1)
