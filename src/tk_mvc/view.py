@@ -8,6 +8,9 @@ class ViewError(Exception):
 class View:
     def __init__(self):
         self._tk_root = tk.Tk()
+        self._tk_root.overrideredirect(1)
+        self._tk_root.withdraw()
+
         self._observers = {}
         self._events = []
         self._windows = {}
@@ -46,8 +49,10 @@ class View:
 
     def add_window(self, window_name, window_cls, *args, **kwargs):
         if window_name not in self._windows:
-            self._windows[window_name] = tk.Toplevel(self._tk_root)
-            window_cls(self._windows[window_name], self, *args, **kwargs)
+            new_window = tk.Toplevel(self._tk_root)
+            new_window.withdraw()
+            window_cls(self, new_window, *args, **kwargs)
+            self._windows[window_name] = new_window
         else:
             raise ViewError('Window name already exists.')
 
