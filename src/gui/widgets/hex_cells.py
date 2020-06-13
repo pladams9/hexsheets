@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import font
 from PIL import Image, ImageTk, ImageDraw, ImageFont
 
 
@@ -170,9 +169,7 @@ class HexCells(tk.Frame):
         return cell_tk_image
 
     def _create_cell_text(self, x, y, width, height):
-        cell_tk_image = self._create_cell_text_image(width, height)
-
-        cell_text_canvas_item = self._canvas.create_image(x, y, image=cell_tk_image, anchor=tk.NW, tag='text')
+        cell_text_canvas_item = self._canvas.create_image(x, y, image=None, anchor=tk.NW, tag='text')
 
         return cell_text_canvas_item
 
