@@ -1,3 +1,4 @@
+from tk_mvc import BaseWindow
 import tkinter as tk
 import tkinter.filedialog as fd
 import gui.widgets
@@ -6,34 +7,33 @@ import webbrowser
 import os
 
 
-class MainWindow:
-    def __init__(self, parent_view, tk_root):
-        self.parent_view = parent_view
-        self.tk_root = tk_root
+class MainWindow(BaseWindow):
+    def __init__(self, view, parent):
+        super().__init__(view, parent)
 
-        tk_root.geometry('800x600')
+        parent.geometry('800x600')
 
-        self.parent_view.add_observer('title', self.update_title)
+        self._view.add_observer('title', self.update_title)
 
-        menu_bar = tk.Menu(tk_root)
-        tk_root.configure(menu=menu_bar)
+        menu_bar = tk.Menu(parent)
+        parent.configure(menu=menu_bar)
 
         self.file_menu = tk.Menu(menu_bar, tearoff=0)
         self.file_menu.add_command(label="New", command=self._new_file)
         self.file_menu.add_command(label="Open...", command=self._open_file)
         self._save_option_allowed = False
-        self.parent_view.add_observer('save_option', self.update_save_option)
+        self._view.add_observer('save_option', self.update_save_option)
         self.file_menu.add_command(label="Save", command=self._save_file)
         self.file_menu.add_command(label="Save As...", command=self._save_file_as)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit", command=tk_root.quit)
+        self.file_menu.add_command(label="Exit", command=parent.quit)
         menu_bar.add_cascade(label="File", menu=self.file_menu)
 
         menu_bar.add_command(label='Help', command=self._help)
 
-        tk_root.rowconfigure(0, weight=1)
-        tk_root.columnconfigure(0, weight=1)
-        mainframe = tk.Frame(tk_root)
+        parent.rowconfigure(0, weight=1)
+        parent.columnconfigure(0, weight=1)
+        mainframe = tk.Frame(parent)
         mainframe.grid(sticky='nsew')
         mainframe.rowconfigure(1, weight=1)
         mainframe.columnconfigure(0, weight=1)
@@ -55,7 +55,7 @@ class MainWindow:
 
         self.formula_box = tk.Entry(formula_bar)
         self.formula_box.pack(fill=tk.X)
-        self.parent_view.add_observer('formula_box', self.update_formula_box)
+        self._view.add_observer('formula_box', self.update_formula_box)
 
         self.spreadsheet = gui.widgets.HexCells(mainframe,
                                                 hex_rows=20, hex_columns=20,
@@ -64,15 +64,15 @@ class MainWindow:
                                                 resize_column_command=self.resize_column
         )
         self.spreadsheet.grid(column=0, row=1, sticky='nsew')
-        self.parent_view.add_observer('cell_values', self.spreadsheet.set_cell_values)
-        self.parent_view.add_observer('row_sizes', self.spreadsheet.set_row_sizes)
-        self.parent_view.add_observer('column_sizes', self.spreadsheet.set_column_sizes)
+        self._view.add_observer('cell_values', self.spreadsheet.set_cell_values)
+        self._view.add_observer('row_sizes', self.spreadsheet.set_row_sizes)
+        self._view.add_observer('column_sizes', self.spreadsheet.set_column_sizes)
 
         self._formula_boxes = [
             self.formula_box,
             self.spreadsheet.hidden_entry
         ]
-        vcmd = (self.tk_root.register(self._enter_formula), '%W', '%P')
+        vcmd = (self._parent_toplevel.register(self._enter_formula), '%W', '%P')
         for box in self._formula_boxes:
             box.config(vcmd=vcmd)
             box.bind("<FocusIn>", lambda e: e.widget.config(validate='key'))
@@ -80,20 +80,20 @@ class MainWindow:
 
         self.status_bar = tk.Label(mainframe, relief=tk.GROOVE, anchor=tk.W)
         self.status_bar.grid(column=0, row=2, sticky=(tk.W, tk.E))
-        self.parent_view.add_observer('status_bar', self.update_status_bar)
+        self._view.add_observer('status_bar', self.update_status_bar)
 
     def update_status_bar(self, text):
         self.status_bar.config(text=text)
 
     def update_title(self, text):
-        self.tk_root.title('HexSheets - ' + text)
+        self._parent_toplevel.title('HexSheets - ' + text)
 
     def _enter_formula(self, widget, new_text):
         for box in self._formula_boxes:
-            if box != self.tk_root.nametowidget(widget):
+            if box != self._parent_toplevel.nametowidget(widget):
                 box.delete(0, tk.END)
                 box.insert(0, new_text)
-        self.parent_view.add_event(event.Event('FormulaChanged', {'formula': new_text}))
+        self._view.add_event(event.Event('FormulaChanged', {'formula': new_text}))
 
         return True
 
@@ -106,34 +106,34 @@ class MainWindow:
             box.config(validate=validation)
 
     def select_cell(self, address):
-        self.parent_view.add_event(event.Event('CellSelected', {'address': address}))
+        self._view.add_event(event.Event('CellSelected', {'address': address}))
 
     def resize_row(self, row, height):
-        self.parent_view.add_event(event.Event('RowResized', {
+        self._view.add_event(event.Event('RowResized', {
             'row': row,
             'height': height
         }))
 
     def resize_column(self, column, width):
-        self.parent_view.add_event(event.Event('ColumnResized', {
+        self._view.add_event(event.Event('ColumnResized', {
             'column': column,
             'width': width
         }))
 
     def _new_file(self):
-        self.parent_view.add_event(event.Event('NewFile'))
+        self._view.add_event(event.Event('NewFile'))
 
     def _open_file(self):
         open_file_name = fd.askopenfilename(filetypes=(('HexSheets', '*.hxs'),
                                                        ('All Files', '*.*')))
-        self.parent_view.add_event(event.Event('OpenFile', {'filename': open_file_name}))
+        self._view.add_event(event.Event('OpenFile', {'filename': open_file_name}))
 
     def update_save_option(self, option):
         self._save_option_allowed = option
 
     def _save_file(self):
         if self._save_option_allowed:
-            self.parent_view.add_event(event.Event('SaveFile'))
+            self._view.add_event(event.Event('SaveFile'))
         else:
             self._save_file_as()
 
@@ -141,7 +141,7 @@ class MainWindow:
         save_file_name = fd.asksaveasfilename(defaultextension='hxs',
                                               filetypes=(('HexSheets', '*.hxs'),
                                                          ('All Files', '*.*')))
-        self.parent_view.add_event(event.Event('SaveFileAs', {'filename': save_file_name}))
+        self._view.add_event(event.Event('SaveFileAs', {'filename': save_file_name}))
 
     def _help(self):
         webbrowser.open_new(os.getcwd() + '/docs/index.html')

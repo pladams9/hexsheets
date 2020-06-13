@@ -1,11 +1,14 @@
-import hexsheets_view
+import tk_mvc
+from gui.windows import MainWindow
 import model
 
 
 class Controller:
     def __init__(self):
         self.model = model.Model()
-        self.view = hexsheets_view.HexSheetsView()
+        self.view = tk_mvc.View()
+        self.view.add_window('MainWindow', MainWindow)
+        self.view.show_window('MainWindow')
 
         self._event_handlers = {
             'FormulaChanged': self.formula_changed,
