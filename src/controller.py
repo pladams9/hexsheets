@@ -12,7 +12,7 @@ class Controller(tk_mvc.BaseController):
         self._view.add_window('MainWindow', MainWindow)
         self._view.show_window('MainWindow')
 
-        self.add_event_handlers({
+        self._add_event_handlers({
             'FormulaChanged': self.formula_changed,
             'CellSelected': self.cell_selected,
             'RowResized': self.row_resized,
