@@ -26,7 +26,8 @@ class MainWindow(BaseWindow):
         self.file_menu.add_command(label="Save", command=self._save_file)
         self.file_menu.add_command(label="Save As...", command=self._save_file_as)
         self.file_menu.add_separator()
-        self.file_menu.add_command(label="Exit", command=parent.quit)
+        self.file_menu.add_command(label="Exit", command=self.quit)
+        self._parent_toplevel.protocol("WM_DELETE_WINDOW", self.quit)
         menu_bar.add_cascade(label="File", menu=self.file_menu)
 
         menu_bar.add_command(label='Help', command=self._help)
