@@ -1,7 +1,6 @@
 from .view import View
 from .event import Event
-from typing import Dict
-from typing import Callable
+from typing import Dict, Callable
 
 
 class BaseController:
