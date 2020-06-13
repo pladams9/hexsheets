@@ -1,13 +1,13 @@
 import tk_mvc
 from gui.windows import MainWindow
-import model
+import core
 
 
 class Controller(tk_mvc.BaseController):
     def __init__(self):
         super().__init__()
 
-        self.model = model.Model()
+        self.model = core.HexSheetsCore()
 
         self._view.add_window('MainWindow', MainWindow)
         self._view.show_window('MainWindow')

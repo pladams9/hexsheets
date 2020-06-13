@@ -1,9 +1,18 @@
-import model.formula_parser as fp
+"""
+The 'core' package defines all the parts of HexSheet's actual functionality, starting with the HexSheetsCore class in
+this file.
+"""
+
+import core.formula_parser as fp
 import json
 import ast
 
 
-class Model:
+class HexSheetsCore:
+    """
+    HexSheetsCore is the model in HexSheet's MVC structure. All functionality is accessed through this class.
+    """
+
     # CONSTANTS
     ROW_SIZES_DEFAULT = {
         -1: 40
@@ -14,8 +23,8 @@ class Model:
 
     def __init__(self):
         self._cell_formulas = {}
-        self._row_sizes = Model.ROW_SIZES_DEFAULT.copy()
-        self._column_sizes = Model.COLUMN_SIZES_DEFAULT.copy()
+        self._row_sizes = HexSheetsCore.ROW_SIZES_DEFAULT.copy()
+        self._column_sizes = HexSheetsCore.COLUMN_SIZES_DEFAULT.copy()
 
         self._selected_cell = None
         self.editing_cell = False
@@ -62,8 +71,8 @@ class Model:
 
     def new_file(self):
         self._cell_formulas = {}
-        self._row_sizes = Model.ROW_SIZES_DEFAULT.copy()
-        self._column_sizes = Model.COLUMN_SIZES_DEFAULT.copy()
+        self._row_sizes = HexSheetsCore.ROW_SIZES_DEFAULT.copy()
+        self._column_sizes = HexSheetsCore.COLUMN_SIZES_DEFAULT.copy()
         self._file_saved = False
         self._file_path = None
 

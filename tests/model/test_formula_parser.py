@@ -1,5 +1,5 @@
 import unittest
-import model.formula_parser as fp
+import core.formula_parser as fp
 
 
 class TestFormulaParser(unittest.TestCase):
