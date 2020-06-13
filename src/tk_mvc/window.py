@@ -1,6 +1,5 @@
 from tkinter import Frame
 from tkinter import Toplevel
-from .view import View
 
 
 class BaseWindow(Frame):
@@ -9,7 +8,7 @@ class BaseWindow(Frame):
     upon creation.
     """
 
-    def __init__(self, view: View, parent_toplevel: Toplevel) -> None:
+    def __init__(self, view, parent_toplevel: Toplevel, *args, **kwargs) -> None:
         super().__init__(parent_toplevel)
         self._view = view
         self._parent_toplevel = parent_toplevel
