@@ -1,14 +1,14 @@
-import tk_mvc
+from tk_mvc import View
 
 
-class Controller:
+class BaseController:
     EVENT_HANDLER_INTERVAL = 100
 
     def __init__(self):
-        self._view = tk_mvc.View()
+        self._view = View()
 
         self._event_handlers = {}
-        self._view.add_loop_hook(self.handle_events, Controller.EVENT_HANDLER_INTERVAL)
+        self._view.add_loop_hook(self.handle_events, self.EVENT_HANDLER_INTERVAL)
 
     def start(self):
         self._view.start_mainloop()

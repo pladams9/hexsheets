@@ -3,7 +3,7 @@ from gui.windows import MainWindow
 import model
 
 
-class Controller(tk_mvc.Controller):
+class Controller(tk_mvc.BaseController):
     def __init__(self):
         super().__init__()
 
