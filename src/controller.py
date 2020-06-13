@@ -1,5 +1,4 @@
 import hexsheets_view
-import tkinter as tk
 import model
 
 
