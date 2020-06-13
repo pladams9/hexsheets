@@ -1,6 +1,6 @@
 # HexSheets
 [![Version](https://img.shields.io/github/v/release/pladams9/hexsheets)](https://github.com/pladams9/hexsheets/releases)
-![Last Commit](https://img.shields.io/github/last-commit/pladams9/hexsheets)
+[![Last Commit](https://img.shields.io/github/last-commit/pladams9/hexsheets)](https://github.com/pladams9/hexsheets/commits)
 
 ## What is HexSheets?
 HexSheets is a basic spreadsheet application with hexagonal cells and a pet project of mine.
