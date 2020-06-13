@@ -15,8 +15,8 @@ class MainWindow(BaseWindow):
 
         self._view.add_observer('title', self.update_title)
 
-        menu_bar = tk.Menu(_parent_toplevel)
-        _parent_toplevel.configure(menu=menu_bar)
+        menu_bar = tk.Menu(self._parent_toplevel)
+        self._parent_toplevel.configure(menu=menu_bar)
 
         self.file_menu = tk.Menu(menu_bar, tearoff=0)
         self.file_menu.add_command(label="New", command=self._new_file)
@@ -32,14 +32,13 @@ class MainWindow(BaseWindow):
 
         menu_bar.add_command(label='Help', command=self._help)
 
-        _parent_toplevel.rowconfigure(0, weight=1)
-        _parent_toplevel.columnconfigure(0, weight=1)
-        mainframe = tk.Frame(_parent_toplevel)
-        mainframe.grid(sticky='nsew')
-        mainframe.rowconfigure(1, weight=1)
-        mainframe.columnconfigure(0, weight=1)
+        self._parent_toplevel.rowconfigure(0, weight=1)
+        self._parent_toplevel.columnconfigure(0, weight=1)
+        self.grid(sticky='nsew')
+        self.rowconfigure(1, weight=1)
+        self.columnconfigure(0, weight=1)
 
-        top_bar = tk.Frame(mainframe)
+        top_bar = tk.Frame(self)
         top_bar.grid(column=0, row=0, sticky='nsew')
         top_bar.columnconfigure(0, weight=1)
 
@@ -58,7 +57,7 @@ class MainWindow(BaseWindow):
         self.formula_box.pack(fill=tk.X)
         self._view.add_observer('formula_box', self.update_formula_box)
 
-        self.spreadsheet = gui.widgets.HexCells(mainframe,
+        self.spreadsheet = gui.widgets.HexCells(self,
                                                 hex_rows=20, hex_columns=20,
                                                 select_command=self.select_cell,
                                                 resize_row_command=self.resize_row,
@@ -79,7 +78,7 @@ class MainWindow(BaseWindow):
             box.bind("<FocusIn>", lambda e: e.widget.config(validate='key'))
             box.bind("<FocusOut>", lambda e: e.widget.config(validate='none'))
 
-        self.status_bar = tk.Label(mainframe, relief=tk.GROOVE, anchor=tk.W)
+        self.status_bar = tk.Label(self, relief=tk.GROOVE, anchor=tk.W)
         self.status_bar.grid(column=0, row=2, sticky=(tk.W, tk.E))
         self._view.add_observer('status_bar', self.update_status_bar)
 
