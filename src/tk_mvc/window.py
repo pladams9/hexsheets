@@ -11,4 +11,4 @@ class BaseWindow(Frame):
     def __init__(self, view, parent_toplevel: Toplevel, *args, **kwargs) -> None:
         super().__init__(parent_toplevel)
         self._view = view
-        self._parent_toplevel = parent_toplevel
+        self._window = parent_toplevel
