@@ -6,8 +6,7 @@ import model
 class Controller:
     def __init__(self):
         self.model = model.Model()
-        self.tk_root = tk.Tk()
-        self.view = hexsheets_view.HexSheetsView(self.tk_root)
+        self.view = hexsheets_view.HexSheetsView()
 
         self._event_handlers = {
             'FormulaChanged': self.formula_changed,
@@ -25,15 +24,13 @@ class Controller:
 
         self.new_file()
 
-        self.tk_root.after(100, self.handle_events)
-        self.tk_root.mainloop()
+        self.view.add_loop_hook(self.handle_events, 100)
+        self.view.start_mainloop()
 
     def handle_events(self):
         for e in self.view.get_events():
             if e.type in self._event_handlers:
                 self._event_handlers[e.type](e)
-
-        self.tk_root.after(100, self.handle_events)
 
     def formula_changed(self, e):
         self.model.set_selected_cell_formula(e.data['formula'])
