@@ -1,7 +1,7 @@
 import tkinter as tk
+import tkinter.ttk as ttk
 import tkinter.font as tkf
 from tk_mvc import WindowPart, Event
-
 
 class TopArea(WindowPart):
     def _build(self):
@@ -20,6 +20,13 @@ class TopArea(WindowPart):
         ]
         for button in buttons:
             button.pack(side=tk.LEFT, fill=tk.Y)
+
+        self._font_size = tk.StringVar()
+        self._font_size.set('12')
+        font_size_options = ['8', '9', '10', '11', '12', '14', '16', '18', '20', '24', '32', '48', '72']
+        font_size_dropdown = ttk.Combobox(tool_bar, textvariable=self._font_size, values=font_size_options,
+                                          justify=tk.RIGHT, width=3)
+        font_size_dropdown.pack(side=tk.LEFT)
 
         # Formula Bar
         formula_bar = tk.Frame(self)
