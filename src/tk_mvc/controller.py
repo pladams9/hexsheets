@@ -27,6 +27,8 @@ class BaseController:
         for e in self._view.get_events():
             if e.type in self._event_handlers:
                 self._event_handlers[e.type](e)
+            else:
+                print('No handler registered for', e.type)
 
     def _add_event_handlers(self, event_handlers: Dict[str, Callable[[Event], None]]) -> None:
         for event, handler in event_handlers.items():

@@ -20,9 +20,15 @@ class HexSheetsCore:
     COLUMN_SIZES_DEFAULT = {
         -1: 30
     }
+    DEFAULT_FORMAT = {
+        'bold': False,
+        'italic': False,
+        'underline': False
+    }
 
     def __init__(self):
         self._cell_formulas = {}
+        self._cell_formats = {}
         self._row_sizes = HexSheetsCore.ROW_SIZES_DEFAULT.copy()
         self._column_sizes = HexSheetsCore.COLUMN_SIZES_DEFAULT.copy()
 
@@ -134,3 +140,11 @@ class HexSheetsCore:
             return True
         else:
             return False
+
+    def toggle_bold(self):
+        if self._selected_cell not in self._cell_formats:
+            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
+        self._cell_formats[self._selected_cell]['bold'] = not self._cell_formats[self._selected_cell]['bold']
+
+    def get_cell_formats(self):
+        return self._cell_formats

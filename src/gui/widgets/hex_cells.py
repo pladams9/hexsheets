@@ -24,6 +24,7 @@ class HexCells(tk.Frame):
         self._resize_column_command = None
 
         self._cell_values = {}
+        self._cell_formats = {}
 
         super().__init__(master, **(self._custom_options(**kwargs)))
 
@@ -156,13 +157,16 @@ class HexCells(tk.Frame):
                                                 )
         return hex_shape
 
-    def _create_cell_text_image(self, width, height, text=''):
+    def _create_cell_text_image(self, width, height, text='', format_options=None):
         cell_text_image = Image.new('RGBA', (int(width), int(height)), (0, 0, 0, 0))
 
         font_size = 14
-        PILfont = ImageFont.truetype('arial.ttf', font_size)
+        cell_font = ImageFont.truetype('arial.ttf', font_size)
+        if format_options is None:
+            format_options = {}
+
         draw = ImageDraw.Draw(cell_text_image)
-        draw.text((0, (height - font_size) / 2), str(text), fill=(0, 0, 0), font=PILfont)
+        draw.text((0, (height - font_size) / 2), str(text), fill=(0, 0, 0), font=cell_font)
 
         cell_tk_image = ImageTk.PhotoImage(image=cell_text_image)
         self._tk_images.append(cell_tk_image)
@@ -298,7 +302,7 @@ class HexCells(tk.Frame):
         self._create_column_handles()
         self._create_row_handles()
 
-        self._update_cell_values()
+        self._update_cells()
 
     def _cell_click(self, e):
         canvas_x = self._canvas.canvasx(e.x)
@@ -324,11 +328,15 @@ class HexCells(tk.Frame):
 
         self.hidden_entry.focus_set()
 
+    def set_cell_formats(self, formats):
+        self._cell_formats = formats
+        self._update_cells()
+
     def set_cell_values(self, values):
         self._cell_values = values
-        self._update_cell_values()
+        self._update_cells()
 
-    def _update_cell_values(self):
+    def _update_cells(self):
         items = self._canvas.find_withtag('text&&has_value')
         self._tk_images = []
         for item in items:
@@ -338,7 +346,14 @@ class HexCells(tk.Frame):
         for coord in self._cell_values:
             items = self._canvas.find_withtag('text&&col{0}&&row{1}'.format(coord[0], coord[1]))
             if items:
-                cell_text_image = self._create_cell_text_image(self._column_widths[coord[0]], self._row_heights[coord[1]], self._cell_values[coord])
+                if coord in self._cell_formats:
+                    cell_format = self._cell_formats[coord]
+                else:
+                    cell_format = None
+                cell_text_image = self._create_cell_text_image(self._column_widths[coord[0]],
+                                                               self._row_heights[coord[1]],
+                                                               self._cell_values[coord],
+                                                               cell_format)
                 self._canvas.itemconfig(items[0], image=cell_text_image)
                 self._canvas.addtag_withtag('has_value', items[0])
 

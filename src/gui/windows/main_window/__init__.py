@@ -26,7 +26,7 @@ class MainWindow(BaseWindow):
         # Top Area
         self.top_area = TopArea(self._view, self)
         self.top_area.grid(column=0, row=0, sticky='nsew')
-        view.add_observer('formula_box', self.update_formula_box)
+        self._view.add_observer('formula_box', self.update_formula_box)
 
         # Spreadsheet Area
         self.spreadsheet_area = SpreadsheetArea(self._view, self)

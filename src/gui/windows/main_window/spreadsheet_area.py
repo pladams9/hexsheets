@@ -15,6 +15,7 @@ class SpreadsheetArea(WindowPart):
         self.hidden_entry = spreadsheet.hidden_entry
 
         self._view.add_observer('cell_values', spreadsheet.set_cell_values)
+        self._view.add_observer('cell_formats', spreadsheet.set_cell_formats)
         self._view.add_observer('row_sizes', spreadsheet.set_row_sizes)
         self._view.add_observer('column_sizes', spreadsheet.set_column_sizes)
 

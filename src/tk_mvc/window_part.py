@@ -1,5 +1,5 @@
 from tkinter import Frame
-
+from tk_mvc import View
 
 class WindowPart(Frame):
     """
@@ -8,7 +8,7 @@ class WindowPart(Frame):
     that a View must passed to it).
     """
 
-    def __init__(self, view, *args, **kwargs) -> None:
+    def __init__(self, view: View, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._view = view
         self._build()
