@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.ttk as ttk
 import tkinter.font as tkf
+import tkinter.colorchooser as tkc
 from tk_mvc import WindowPart, Event
 
 class TopArea(WindowPart):
@@ -27,6 +28,18 @@ class TopArea(WindowPart):
         font_size_dropdown = ttk.Combobox(tool_bar, textvariable=self._font_size, values=font_size_options,
                                           justify=tk.RIGHT, width=3)
         font_size_dropdown.pack(side=tk.LEFT)
+
+        font_color_button = tk.Frame(tool_bar, bg='#EEE', bd=2, relief=tk.SUNKEN, width=32, height=32)
+        def pick_color(e):
+            c = tkc.askcolor(title='Pick a color', color='blue')
+            e.widget.config(bg=c[1])
+
+        font_color_button.bind('<ButtonRelease-1>', pick_color)
+        font_color_button.pack(side=tk.LEFT)
+
+        cell_color_button = tk.Frame(tool_bar, bg='#EEE',  bd=2, relief=tk.SUNKEN, width=32, height=32)
+        cell_color_button.bind('<ButtonRelease-1>', pick_color)
+        cell_color_button.pack(side=tk.LEFT)
 
         # Formula Bar
         formula_bar = tk.Frame(self)
