@@ -23,6 +23,7 @@ class HexCells(tk.Frame):
         self._resize_column_command = None
 
         self._cell_values = {}
+        self._cell_formats = {}
 
         super().__init__(master, **(self._custom_options(**kwargs)))
 
@@ -138,7 +139,7 @@ class HexCells(tk.Frame):
 
         return kwargs
 
-    def _create_hex(self, x, y, width, top_height, bottom_height):
+    def _create_hex(self, x, y, width, top_height, bottom_height, cell_color='#EEE'):
         full_height = top_height + bottom_height
         hex_coords = [
             x, y,
@@ -149,19 +150,24 @@ class HexCells(tk.Frame):
             x - self._point_width, y + top_height
         ]
         hex_shape = self._canvas.create_polygon(hex_coords,
-                                                fill=self.colors['cell-bg'],
+                                                fill=cell_color,
                                                 outline=self.colors['cell-line'],
                                                 tag='hex'
                                                 )
         return hex_shape
 
-    def _create_cell_text_image(self, width, height, text=''):
+    def _create_cell_text_image(self, width, height, text='', format_options=None):
         cell_text_image = Image.new('RGBA', (int(width), int(height)), (0, 0, 0, 0))
 
-        font_size = 14
-        PILfont = ImageFont.truetype('arial.ttf', font_size)
+        if format_options is None:
+            format_options = {
+                'font_size': 14,
+                'font_color': '#000'
+            }
+        cell_font = ImageFont.truetype('arial.ttf', format_options['font_size'])
+
         draw = ImageDraw.Draw(cell_text_image)
-        draw.text((0, (height - font_size) / 2), str(text), fill=(0, 0, 0), font=PILfont)
+        draw.text((0, (height - format_options['font_size']) / 2), str(text), fill=format_options['font_color'], outline='#F00', font=cell_font)
 
         cell_tk_image = ImageTk.PhotoImage(image=cell_text_image)
         self._tk_images.append(cell_tk_image)
@@ -183,16 +189,21 @@ class HexCells(tk.Frame):
                 canvas_x = sum(w + self._point_width for w in self._column_widths[0:cell_x])
                 canvas_y = sum(self._row_heights[0:cell_y]) + [0, self._row_heights[cell_y] / 2][cell_x % 2]
 
+                if (cell_x, cell_y) in self._cell_formats:
+                    cell_color = self._cell_formats[(cell_x, cell_y)]['cell_color']
+                else:
+                    cell_color = '#EEE'
+
                 if ((cell_x % 2) != 0) and (cell_y + 1 != self._hex_rows):
                     h = self._create_hex(canvas_x, canvas_y, self._column_widths[cell_x], self._row_heights[cell_y] / 2,
-                                         self._row_heights[cell_y + 1] / 2)
+                                         self._row_heights[cell_y + 1] / 2, cell_color)
                     t = self._create_cell_text(canvas_x,
                                                canvas_y,
                                                self._column_widths[cell_x],
                                                (self._row_heights[cell_y] + self._row_heights[cell_y + 1]) / 2)
                 else:
                     h = self._create_hex(canvas_x, canvas_y, self._column_widths[cell_x], self._row_heights[cell_y] / 2,
-                                         self._row_heights[cell_y] / 2)
+                                         self._row_heights[cell_y] / 2, cell_color)
                     t = self._create_cell_text(canvas_x, canvas_y, self._column_widths[cell_x],
                                                self._row_heights[cell_y])
 
@@ -295,7 +306,14 @@ class HexCells(tk.Frame):
         self._create_column_handles()
         self._create_row_handles()
 
-        self._update_cell_values()
+        self._update_cells()
+
+    def _update_cell_colors(self):
+        self._canvas.itemconfig('hex', fill='#EEE')
+        for coord in self._cell_formats:
+            items = self._canvas.find_withtag('hex&&col{0}&&row{1}'.format(coord[0], coord[1]))
+            if items:
+                self._canvas.itemconfig(items[0], fill=self._cell_formats[coord]['cell_color'])
 
     def _cell_click(self, e):
         canvas_x = self._canvas.canvasx(e.x)
@@ -321,11 +339,16 @@ class HexCells(tk.Frame):
 
         self.hidden_entry.focus_set()
 
+    def set_cell_formats(self, formats):
+        self._cell_formats = formats
+        self._update_cell_colors()
+        self._update_cells()
+
     def set_cell_values(self, values):
         self._cell_values = values
-        self._update_cell_values()
+        self._update_cells()
 
-    def _update_cell_values(self):
+    def _update_cells(self):
         items = self._canvas.find_withtag('text&&has_value')
         self._tk_images = []
         for item in items:
@@ -335,7 +358,14 @@ class HexCells(tk.Frame):
         for coord in self._cell_values:
             items = self._canvas.find_withtag('text&&col{0}&&row{1}'.format(coord[0], coord[1]))
             if items:
-                cell_text_image = self._create_cell_text_image(self._column_widths[coord[0]], self._row_heights[coord[1]], self._cell_values[coord])
+                if coord in self._cell_formats:
+                    cell_format = self._cell_formats[coord]
+                else:
+                    cell_format = None
+                cell_text_image = self._create_cell_text_image(self._column_widths[coord[0]],
+                                                               self._row_heights[coord[1]],
+                                                               self._cell_values[coord],
+                                                               cell_format)
                 self._canvas.itemconfig(items[0], image=cell_text_image)
                 self._canvas.addtag_withtag('has_value', items[0])
 
