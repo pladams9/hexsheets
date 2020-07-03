@@ -80,6 +80,7 @@ class HexSheetsCore:
 
     def new_file(self):
         self._cell_formulas = {}
+        self._cell_formats = {}
         self._row_sizes = HexSheetsCore.ROW_SIZES_DEFAULT.copy()
         self._column_sizes = HexSheetsCore.COLUMN_SIZES_DEFAULT.copy()
         self._file_saved = False

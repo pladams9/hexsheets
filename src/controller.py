@@ -60,6 +60,7 @@ class Controller(tk_mvc.BaseController):
     def _new_file(self, e=None):
         self.model.new_file()
         self._view.set_value('cell_values', self.model.get_cell_values())
+        self._view.set_value('cell_formats', self.model.get_cell_formats())
         self._view.set_value('row_sizes', self.model.get_row_sizes())
         self._view.set_value('column_sizes', self.model.get_column_sizes())
         self._view.set_value('title', self.model.get_file_title())
