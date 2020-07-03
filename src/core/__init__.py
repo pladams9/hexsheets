@@ -170,8 +170,9 @@ class HexSheetsCore:
 
     def get_current_cell_color(self):
         if self._selected_cell not in self._cell_formats:
-            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
-        return self._cell_formats[self._selected_cell]['cell_color']
+            return self.DEFAULT_FORMAT['cell_color']
+        else:
+            return self._cell_formats[self._selected_cell]['cell_color']
 
     def set_cell_font_color(self, color: str):
         if self._selected_cell not in self._cell_formats:
@@ -180,8 +181,9 @@ class HexSheetsCore:
 
     def get_current_cell_font_color(self):
         if self._selected_cell not in self._cell_formats:
-            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
-        return self._cell_formats[self._selected_cell]['font_color']
+            return self.DEFAULT_FORMAT['font_color']
+        else:
+            return self._cell_formats[self._selected_cell]['font_color']
 
     def set_cell_font_size(self, size: int):
         if self._selected_cell not in self._cell_formats:
@@ -190,5 +192,6 @@ class HexSheetsCore:
 
     def get_current_cell_font_size(self):
         if self._selected_cell not in self._cell_formats:
-            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
-        return self._cell_formats[self._selected_cell]['font_size']
+            return self.DEFAULT_FORMAT['font_size']
+        else:
+            return self._cell_formats[self._selected_cell]['font_size']
