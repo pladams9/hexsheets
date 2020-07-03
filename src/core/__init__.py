@@ -23,7 +23,10 @@ class HexSheetsCore:
     DEFAULT_FORMAT = {
         'bold': False,
         'italic': False,
-        'underline': False
+        'underline': False,
+        'cell_color': '#EEE',
+        'font_color': '#000',
+        'font_size': 14
     }
 
     def __init__(self):
@@ -94,8 +97,12 @@ class HexSheetsCore:
                     self._column_sizes[int(column)] = data['columns'][column]['size']
 
                 self._cell_formulas = {}
+                self._cell_formats = {}
                 for cell_coord in data['cells']:
-                    self._cell_formulas[ast.literal_eval(cell_coord)] = data['cells'][cell_coord]
+                    if 'formula' in data['cells'][cell_coord]:
+                        self._cell_formulas[ast.literal_eval(cell_coord)] = data['cells'][cell_coord]['formula']
+                    if 'format' in data['cells'][cell_coord]:
+                        self._cell_formats[ast.literal_eval(cell_coord)] = data['cells'][cell_coord]['format']
                 self._file_saved = True
                 self._file_path = filename
 
@@ -117,8 +124,14 @@ class HexSheetsCore:
                 data['columns'][column] = {
                     'size': self._column_sizes[column]
                 }
-            for cell_coord in self._cell_formulas:
-                data['cells'][str(cell_coord)] = self._cell_formulas[cell_coord]
+            all_cells = set(self._cell_formulas.keys())
+            all_cells.update(self._cell_formats.keys())
+            for cell_coord in all_cells:
+                data['cells'][str(cell_coord)] = {}
+                if cell_coord in self._cell_formulas:
+                    data['cells'][str(cell_coord)]['formula'] = self._cell_formulas[cell_coord]
+                if cell_coord in self._cell_formats:
+                    data['cells'][str(cell_coord)]['format'] = self._cell_formats[cell_coord]
 
             with open(filename, 'w') as file:
                 json.dump(data, file)
@@ -148,3 +161,33 @@ class HexSheetsCore:
 
     def get_cell_formats(self):
         return self._cell_formats
+
+    def set_cell_color(self, color: str):
+        if self._selected_cell not in self._cell_formats:
+            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
+        self._cell_formats[self._selected_cell]['cell_color'] = color
+
+    def get_current_cell_color(self):
+        if self._selected_cell not in self._cell_formats:
+            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
+        return self._cell_formats[self._selected_cell]['cell_color']
+
+    def set_cell_font_color(self, color: str):
+        if self._selected_cell not in self._cell_formats:
+            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
+        self._cell_formats[self._selected_cell]['font_color'] = color
+
+    def get_current_cell_font_color(self):
+        if self._selected_cell not in self._cell_formats:
+            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
+        return self._cell_formats[self._selected_cell]['font_color']
+
+    def set_cell_font_size(self, size: int):
+        if self._selected_cell not in self._cell_formats:
+            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
+        self._cell_formats[self._selected_cell]['font_size'] = size
+
+    def get_current_cell_font_size(self):
+        if self._selected_cell not in self._cell_formats:
+            self._cell_formats[self._selected_cell] = self.DEFAULT_FORMAT.copy()
+        return self._cell_formats[self._selected_cell]['font_size']

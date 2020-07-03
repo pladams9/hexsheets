@@ -160,13 +160,15 @@ class HexCells(tk.Frame):
     def _create_cell_text_image(self, width, height, text='', format_options=None):
         cell_text_image = Image.new('RGBA', (int(width), int(height)), (0, 0, 0, 0))
 
-        font_size = 14
-        cell_font = ImageFont.truetype('arial.ttf', font_size)
         if format_options is None:
-            format_options = {}
+            format_options = {
+                'font_size': 14,
+                'font_color': '#000'
+            }
+        cell_font = ImageFont.truetype('arial.ttf', format_options['font_size'])
 
         draw = ImageDraw.Draw(cell_text_image)
-        draw.text((0, (height - font_size) / 2), str(text), fill=(0, 0, 0), font=cell_font)
+        draw.text((0, (height - format_options['font_size']) / 2), str(text), fill=format_options['font_color'], outline='#F00', font=cell_font)
 
         cell_tk_image = ImageTk.PhotoImage(image=cell_text_image)
         self._tk_images.append(cell_tk_image)
@@ -304,6 +306,12 @@ class HexCells(tk.Frame):
 
         self._update_cells()
 
+    def _update_cell_colors(self):
+        for coord in self._cell_formats:
+            items = self._canvas.find_withtag('hex&&col{0}&&row{1}'.format(coord[0], coord[1]))
+            if items:
+                self._canvas.itemconfig(items[0], fill=self._cell_formats[coord]['cell_color'])
+
     def _cell_click(self, e):
         canvas_x = self._canvas.canvasx(e.x)
         canvas_y = self._canvas.canvasy(e.y)
@@ -330,6 +338,7 @@ class HexCells(tk.Frame):
 
     def set_cell_formats(self, formats):
         self._cell_formats = formats
+        self._update_cell_colors()
         self._update_cells()
 
     def set_cell_values(self, values):

@@ -21,7 +21,10 @@ class Controller(tk_mvc.BaseController):
             'OpenFile': self._open_file,
             'SaveFile': self._save_file,
             'SaveFileAs': self._save_file_as,
-            'ToggleBold': self._toggle_bold
+            'ToggleBold': self._toggle_bold,
+            'SetCellColor': self._set_cell_color,
+            'SetFontColor': self._set_font_color,
+            'SetFontSize': self._set_font_size
         })
 
         self._view.set_value('title', self.model.get_file_title())
@@ -44,6 +47,10 @@ class Controller(tk_mvc.BaseController):
         self._view.set_value('formula_box', self.model.get_selected_cell_formula())
         self._view.set_value('status_bar', str(xy))
 
+        self._view.set_value('current_cell_color', self.model.get_current_cell_color())
+        self._view.set_value('current_cell_font_color', self.model.get_current_cell_font_color())
+        self._view.set_value('current_cell_font_size', self.model.get_current_cell_font_size())
+
     def _row_resized(self, e):
         self.model.set_row_size(e.data['row'], e.data['height'])
 
@@ -60,9 +67,10 @@ class Controller(tk_mvc.BaseController):
 
     def _open_file(self, e):
         self.model.open_file(e.data['filename'])
-        self._view.set_value('cell_values', self.model.get_cell_values())
         self._view.set_value('row_sizes', self.model.get_row_sizes())
         self._view.set_value('column_sizes', self.model.get_column_sizes())
+        self._view.set_value('cell_values', self.model.get_cell_values())
+        self._view.set_value('cell_formats', self.model.get_cell_formats())
         self._view.set_value('title', self.model.get_file_title())
         self._view.set_value('save_option', self.model.save_file_exists())
 
@@ -77,4 +85,18 @@ class Controller(tk_mvc.BaseController):
 
     def _toggle_bold(self, e):
         self.model.toggle_bold()
+        self._view.set_value('cell_formats', self.model.get_cell_formats())
+
+    def _set_cell_color(self, e):
+        self.model.set_cell_color(e.data['color'])
+        self._view.set_value('current_cell_color', e.data['color'])
+        self._view.set_value('cell_formats', self.model.get_cell_formats())
+
+    def _set_font_color(self, e):
+        self.model.set_cell_font_color(e.data['color'])
+        self._view.set_value('current_cell_font_color', e.data['color'])
+        self._view.set_value('cell_formats', self.model.get_cell_formats())
+
+    def _set_font_size(self, e):
+        self.model.set_cell_font_size(e.data['font_size'])
         self._view.set_value('cell_formats', self.model.get_cell_formats())
