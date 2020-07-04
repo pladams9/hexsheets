@@ -312,15 +312,28 @@ class HexCells(tk.Frame):
                 self._canvas.itemconfig(items[0], fill=self._cell_formats[coord]['cell_color'])
 
     def _cell_click(self, e):
+        self.focus_set()
+
         canvas_x = self._canvas.canvasx(e.x)
         canvas_y = self._canvas.canvasy(e.y)
 
         self._canvas.dtag('clicked', 'clicked')
         self._canvas.addtag_overlapping('clicked', canvas_x, canvas_y, canvas_x, canvas_y)
 
+        clicked_cell_coords = None
+        possible_clicked_cells = self._canvas.find_withtag('clicked && hex')
+        if possible_clicked_cells:
+            cell = possible_clicked_cells[0]
+            clicked_cell_coords = self._cell_coords[cell]
+
+        if self._select_command:
+            self._select_command(clicked_cell_coords)
+
+    def select_cell(self, xy):
+        # TODO: Change selection ring to a separate shape (on top of text; no need to rearrange ordering)
         self._canvas.itemconfig('hex', width=1, outline=self.colors['cell-line'])
 
-        matching_cells = self._canvas.find_withtag('clicked && hex')
+        matching_cells = self._canvas.find_withtag('hex && col{0} && row{1}'.format(xy[0], xy[1]))
         if matching_cells:
             cell = matching_cells[0]
             self._canvas.itemconfig(cell, width=2, outline=self.colors['active-cell-line'])
@@ -329,9 +342,6 @@ class HexCells(tk.Frame):
             self._canvas.tag_raise('text')
 
             self.current_cell = self._cell_coords[cell]
-
-            if self._select_command:
-                self._select_command(self.current_cell)
 
     def set_cell_formats(self, formats):
         self._cell_formats = formats

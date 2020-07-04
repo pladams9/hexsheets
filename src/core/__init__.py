@@ -38,11 +38,35 @@ class HexSheetsCore:
         self._selected_cell = None
         self.editing_cell = False
 
+        self._last_direction = 'down'
+
         self._file_saved = False
         self._file_path = None
 
     def select_cell(self, x, y):
         self._selected_cell = (x, y)
+
+    def move_selection(self, direction: str):
+        if direction == 'up':
+            self._last_direction = 'up'
+            return self._selected_cell[0], self._selected_cell[1] - 1
+        elif direction == 'down':
+            self._last_direction = 'down'
+            return self._selected_cell[0], self._selected_cell[1] + 1
+        elif direction == 'left':
+            if self._last_direction in ('up', 'up-left', 'down-right'):
+                self._last_direction = 'up-left'
+                return self._selected_cell[0] - 1, self._selected_cell[1] - ((self._selected_cell[0] + 1) % 2)
+            else:
+                self._last_direction = 'down-left'
+                return self._selected_cell[0] - 1, self._selected_cell[1] + (self._selected_cell[0] % 2)
+        elif direction == 'right':
+            if self._last_direction in ('up', 'up-right', 'down-left'):
+                self._last_direction = 'up-right'
+                return self._selected_cell[0] + 1, self._selected_cell[1] - ((self._selected_cell[0] + 1) % 2)
+            else:
+                self._last_direction = 'down-right'
+                return self._selected_cell[0] + 1, self._selected_cell[1] + (self._selected_cell[0] % 2)
 
     def set_selected_cell_formula(self, formula):
         if self._selected_cell:

@@ -52,6 +52,16 @@ class TopArea(WindowPart):
 
         self.formula_box = tk.Entry(formula_bar)
         self.formula_box.pack(fill=tk.X)
+        self.formula_box.bind('<Return>', lambda e: self._view.add_event(Event('ExitEditMode', data={'complete': True})))
+        self.formula_box.bind('<Escape>', lambda e: self._view.add_event(Event('ExitEditMode', data={'complete': False})))
+
+        self._view.add_observer('formula_box', self.update_formula_box)
+
+        vcmd = (self.register(self._enter_formula), '%P')
+        self.formula_box.config(vcmd=vcmd)
+        self.formula_box.bind("<FocusIn>", lambda e: e.widget.config(validate='key'))
+        self.formula_box.bind("<FocusOut>", lambda e: e.widget.config(validate='none'))
+        self._view.add_observer('editing_mode', self._change_edit_mode)
 
     def _click_cell_color(self, e):
         new_color = tkc.askcolor(title='Set Cell Color', color=e.widget.cget('color'))
@@ -82,3 +92,18 @@ class TopArea(WindowPart):
         self._font_size.trace_vdelete('w', self.font_trace)
         self._font_size.set(str(size))
         self.font_trace = self._font_size.trace('w', self._change_font_size)
+
+    def _enter_formula(self, new_text):
+        self._view.add_event(Event('FormulaChanged', {'formula': new_text}))
+        return True
+
+    def update_formula_box(self, text):
+        validation = self.formula_box.cget('validate')
+        self.formula_box.config(validate='none')
+        self.formula_box.delete(0, tk.END)
+        self.formula_box.insert(0, text)
+        self.formula_box.config(validate=validation)
+
+    def _change_edit_mode(self, edit_mode):
+        if edit_mode:
+            self.formula_box.focus_set()

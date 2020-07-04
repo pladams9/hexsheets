@@ -26,18 +26,10 @@ class MainWindow(BaseWindow):
         # Top Area
         self.top_area = TopArea(self._view, self)
         self.top_area.grid(column=0, row=0, sticky='nsew')
-        self._view.add_observer('formula_box', self.update_formula_box)
 
         # Spreadsheet Area
         self.spreadsheet_area = SpreadsheetArea(self._view, self)
         self.spreadsheet_area.grid(column=0, row=1, sticky='nsew')
-
-        # Formula Box Commands
-        self._formula_box = self.top_area.formula_box
-        vcmd = (self.register(self._enter_formula), '%P')
-        self._formula_box.config(vcmd=vcmd)
-        self._formula_box.bind("<FocusIn>", lambda e: e.widget.config(validate='key'))
-        self._formula_box.bind("<FocusOut>", lambda e: e.widget.config(validate='none'))
 
         # Status Bar
         self.status_bar = tk.Label(self, relief=tk.GROOVE, anchor=tk.W)
@@ -49,14 +41,3 @@ class MainWindow(BaseWindow):
 
     def update_title(self, text):
         self._window.title('HexSheets - ' + text)
-
-    def _enter_formula(self, new_text):
-        self._view.add_event(Event('FormulaChanged', {'formula': new_text}))
-        return True
-
-    def update_formula_box(self, text):
-        validation = self._formula_box.cget('validate')
-        self._formula_box.config(validate='none')
-        self._formula_box.delete(0, tk.END)
-        self._formula_box.insert(0, text)
-        self._formula_box.config(validate=validation)
