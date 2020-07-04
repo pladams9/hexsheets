@@ -46,10 +46,13 @@ class View:
         self._tk_root.after(interval, lambda: self._run_loop_hook(func, interval))
 
     def add_observer(self, name: str, callback: ObserverCallback) -> None:
-        self._observers[name] = callback
+        if name not in self._observers:
+            self._observers[name] = []
+        self._observers[name].append(callback)
 
     def set_value(self, name: str, value: Any) -> None:
-        self._observers[name](value)
+        for callback in self._observers[name]:
+            callback(value)
 
     def add_event(self, event: Event) -> None:
         self._events.append(event)
