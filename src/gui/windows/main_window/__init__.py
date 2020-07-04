@@ -33,15 +33,11 @@ class MainWindow(BaseWindow):
         self.spreadsheet_area.grid(column=0, row=1, sticky='nsew')
 
         # Formula Box Commands
-        self._formula_boxes = [
-            self.top_area.formula_box,
-            self.spreadsheet_area.hidden_entry
-        ]
-        vcmd = (self.register(self._enter_formula), '%W', '%P')
-        for box in self._formula_boxes:
-            box.config(vcmd=vcmd)
-            box.bind("<FocusIn>", lambda e: e.widget.config(validate='key'))
-            box.bind("<FocusOut>", lambda e: e.widget.config(validate='none'))
+        self._formula_box = self.top_area.formula_box
+        vcmd = (self.register(self._enter_formula), '%P')
+        self._formula_box.config(vcmd=vcmd)
+        self._formula_box.bind("<FocusIn>", lambda e: e.widget.config(validate='key'))
+        self._formula_box.bind("<FocusOut>", lambda e: e.widget.config(validate='none'))
 
         # Status Bar
         self.status_bar = tk.Label(self, relief=tk.GROOVE, anchor=tk.W)
@@ -54,19 +50,13 @@ class MainWindow(BaseWindow):
     def update_title(self, text):
         self._window.title('HexSheets - ' + text)
 
-    def _enter_formula(self, widget, new_text):
-        for box in self._formula_boxes:
-            if box != self._window.nametowidget(widget):
-                box.delete(0, tk.END)
-                box.insert(0, new_text)
+    def _enter_formula(self, new_text):
         self._view.add_event(Event('FormulaChanged', {'formula': new_text}))
-
         return True
 
     def update_formula_box(self, text):
-        for box in self._formula_boxes:
-            validation = box.cget('validate')
-            box.config(validate='none')
-            box.delete(0, tk.END)
-            box.insert(0, text)
-            box.config(validate=validation)
+        validation = self._formula_box.cget('validate')
+        self._formula_box.config(validate='none')
+        self._formula_box.delete(0, tk.END)
+        self._formula_box.insert(0, text)
+        self._formula_box.config(validate=validation)

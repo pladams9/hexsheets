@@ -12,7 +12,6 @@ class SpreadsheetArea(WindowPart):
                                resize_column_command=self._resize_column
                                )
         spreadsheet.pack(fill='both', expand=True)
-        self.hidden_entry = spreadsheet.hidden_entry
 
         self._view.add_observer('cell_values', spreadsheet.set_cell_values)
         self._view.add_observer('cell_formats', spreadsheet.set_cell_formats)

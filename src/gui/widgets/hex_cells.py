@@ -90,10 +90,6 @@ class HexCells(tk.Frame):
         self._canvas.xview_moveto(0)
         self._column_shelf.xview_moveto(0)
 
-        # Hidden entry box TODO: Remove this entry box and move entry outside of widget
-        self.hidden_entry = tk.Entry(self)
-        self.hidden_entry.place(x=-100, y=-100)
-
     def config(self, **kwargs):
         super().config(**(self._custom_options(**kwargs)))
 
@@ -336,8 +332,6 @@ class HexCells(tk.Frame):
 
             if self._select_command:
                 self._select_command(self.current_cell)
-
-        self.hidden_entry.focus_set()
 
     def set_cell_formats(self, formats):
         self._cell_formats = formats
