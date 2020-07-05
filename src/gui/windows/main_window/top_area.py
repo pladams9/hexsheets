@@ -107,3 +107,4 @@ class TopArea(WindowPart):
     def _change_edit_mode(self, edit_mode):
         if edit_mode:
             self.formula_box.focus_set()
+            self.formula_box.select_range(0, tk.END)

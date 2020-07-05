@@ -37,6 +37,7 @@ class HexSheetsCore:
 
         self._selected_cell = None
         self.editing_cell = False
+        self._previous_formula = ''
 
         self._last_direction = 'down'
 
@@ -219,3 +220,13 @@ class HexSheetsCore:
             return self.DEFAULT_FORMAT['font_size']
         else:
             return self._cell_formats[self._selected_cell]['font_size']
+
+    def enter_edit_mode(self):
+        self.editing_cell = True
+        self._previous_formula = self.get_selected_cell_formula()
+
+    def exit_edit_mode(self, save: bool):
+        self.editing_cell = False
+        if not save:
+            self.set_selected_cell_formula(self._previous_formula)
+        self._previous_formula = ''

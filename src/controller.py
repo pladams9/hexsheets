@@ -35,9 +35,7 @@ class Controller(tk_mvc.BaseController):
 
     def _formula_changed(self, e):
         self.model.set_selected_cell_formula(e.data['formula'])
-        self.model.editing_cell = True
         self._view.set_value('cell_values', self.model.get_cell_values())
-        self._view.set_value('title', self.model.get_file_title())
 
     def _cell_selected(self, e):
         xy = e.data['address']
@@ -45,7 +43,7 @@ class Controller(tk_mvc.BaseController):
 
         if self.model.editing_cell:
             self._view.set_value('cell_values', self.model.get_cell_values())
-            self.model.editing_cell = False
+            self.model.exit_edit_mode(True)
 
         self._view.set_value('selected_cell', xy)
 
@@ -115,10 +113,12 @@ class Controller(tk_mvc.BaseController):
         self._cell_selected(tk_mvc.Event('CellSelected', data={'address': new_address}))
 
     def _enter_edit_mode(self, e):
-        self.model.editing_cell = True
+        self.model.enter_edit_mode()
         self._view.set_value('editing_mode', True)
 
     def _exit_edit_mode(self, e):
-        # TODO: Save changes or cancel based on data['complete']
-        self.model.editing_cell = False
+        self.model.exit_edit_mode(e.data['complete'])
         self._view.set_value('editing_mode', False)
+        self._view.set_value('cell_values', self.model.get_cell_values())
+        self._view.set_value('formula_box', self.model.get_selected_cell_formula())
+        self._view.set_value('title', self.model.get_file_title())
